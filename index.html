@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Esmalte</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      max-width: 300px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #resultadoEsmalte {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+  <script>
+    function calcularEsmalte() {
+      var altura = parseFloat(document.getElementById("altura").value);
+      var largura = parseFloat(document.getElementById("largura").value);
+      var gravidadeEspecifica = parseFloat(document.getElementById("gravidadeEspecifica").value);
+
+      var raio = largura / 2;
+      var areaExterna = 2 * Math.PI * raio * altura;
+      var raioInterno = raio - 0.1;
+      var areaInterna = 2 * Math.PI * raioInterno * altura;
+      var quantidadeTintaGramas = (areaExterna + areaInterna) * gravidadeEspecifica;
+      var quantidadeTintaMl = quantidadeTintaGramas / gravidadeEspecifica * 0.1;
+      var quantidadeFinalMl = Math.round(quantidadeTintaMl);
+      var quantidadeFinalGramas = Math.round(quantidadeFinalMl * gravidadeEspecifica);
+
+      document.getElementById("resultadoEsmalte").innerHTML = "Quantidade de esmalte necessária: " + quantidadeFinalMl + " ml (" + quantidadeFinalGramas + " g)";
+    }
+  </script>
+</head>
+<body>
+  <h1>Calculadora de Esmalte</h1>
+
+  <div class="form-group">
+    <label for="altura">Altura do cilindro (cm):</label>
+    <input type="number" id="altura" step="any"><br>
+  </div>
+  <div class="form-group">
+    <label for="largura">Largura do cilindro (cm):</label>
+    <input type="number" id="largura" step="any"><br>
+  </div>
+  <div class="form-group">
+    <label for="gravidadeEspecifica">Gravidade Específica (g/cm³):</label>
+    <input type="number" id="gravidadeEspecifica" step="any" value="1.6"><br>
+  </div>
+
+  <button onclick="calcularEsmalte()">Calcular</button>
+  <div id="resultadoEsmalte"></div>
+</body>
+</html>
