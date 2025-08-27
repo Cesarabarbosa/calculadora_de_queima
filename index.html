@@ -13,10 +13,13 @@
   :root{ --bg:#0f1115; --card:#161a22; --ink:#eaf0ff; --muted:#9aa3b2; --accent:#5dd4c6; --line:#242a35; --warn:#f2c94c; --bad:#ef6b6b; --good:#3bd16f; }
   *{box-sizing:border-box}
   body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink);}
-  header{padding:16px; text-align:center; background:#161a22; border-bottom:1px solid var(--line)}
-  header h1{margin:0 0 6px 0; font-size:22px}
-  header .bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; max-width:1100px; margin:6px auto 0}
-  .muted{color:var(--muted)}
+  header{padding:12px 16px; background:#161a22; border-bottom:1px solid var(--line)}
+  .topbar{max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:12px}
+  .brand{font-size:18px; font-weight:700}
+  .spacer{flex:1}
+  .auth{display:flex; align-items:center; gap:8px}
+  .muted{color:var(--muted); font-size:13px}
+  .who{min-width:130px; text-align:right}
   main{max-width:1100px; margin:0 auto; padding:16px}
   .grid{display:grid; gap:12px}
   @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
@@ -42,15 +45,15 @@
 </head>
 <body>
 <header>
-  <h1>Calculadora de Ocupação do Forno — com Login</h1>
-  <div class="bar">
-    <div class="muted">Usuário: <span id="who">—</span></div>
-    <div>
-      <button id="btnLogin" class="btn primary">Entrar com Google</button>
-      <button id="btnLogout" class="btn">Sair</button>
+  <div class="topbar">
+    <div class="brand">Calculadora de Ocupação do Forno</div>
+    <div class="spacer"></div>
+    <div class="auth">
+      <div class="who muted">Usuário: <span id="who">—</span></div>
+      <button id="btnLogin" class="btn primary" style="display:none">Entrar com Google</button>
+      <button id="btnLogout" class="btn" style="display:none">Sair</button>
     </div>
   </div>
-  <div class="muted" style="margin-top:6px">Faça login, ajuste seu forno/preço, adicione peças e gere o PDF para o cliente.</div>
 </header>
 
 <main>
@@ -142,9 +145,9 @@
       </table>
     </section>
 
-    <!-- Ocupações fixas -->
+    <!-- Ocupações fixas (mobílias) -->
     <section class="card" style="grid-column:1 / -1">
-      <h3>4) Ocupações Fixas do Forno (opcional)</h3>
+      <h3>4) Ocupações Fixas do Forno (mobílias)</h3>
       <p class="muted">Use para prateleiras e suportes. Esses volumes são subtraídos do volume total do forno.</p>
 
       <div class="row">
@@ -203,7 +206,7 @@
       </div>
     </section>
 
-    <!-- Resultado (para conferência interna; o PDF não mostra volumes) -->
+    <!-- Resultado (apenas conferência; PDF não mostra volumes) -->
     <section class="card" style="grid-column:1 / -1">
       <h3>5) Resultado</h3>
       <div class="result">
@@ -220,14 +223,12 @@
 
     <!-- Ações Firebase -->
     <section class="card" style="grid-column:1 / -1">
-      <h3>6) Salvar/Carregar (Firebase)</h3>
+      <h3>6) Salvar / Carregar (Firebase)</h3>
       <div style="display:flex; gap:8px; flex-wrap:wrap">
         <button id="btnLoadPrefs" class="btn">Carregar preferências</button>
         <button id="btnSavePrefs" class="btn">Salvar preferências</button>
         <button id="btnSaveJob" class="btn primary">Salvar QUEIMA (histórico)</button>
       </div>
-      <p class="muted" style="margin-top:6px">Preferências: dimensões do forno, tipo de queima padrão e valor do forno cheio.  
-      “Salvar QUEIMA” guarda esta montagem em <code>/users/{uid}/queimas</code>.</p>
     </section>
   </div>
 </main>
@@ -259,16 +260,28 @@
   const $ = s => document.querySelector(s);
   let currentUser = null;
 
-  // Login/Logout
-  $('#btnLogin').addEventListener('click', async ()=> {
+  // Login/Logout com alinhamento e toggle de botões
+  const btnLogin = $('#btnLogin');
+  const btnLogout = $('#btnLogout');
+  function updateAuthButtons(user){
+    if(user){
+      btnLogin.style.display = 'none';
+      btnLogout.style.display = 'inline-flex';
+    }else{
+      btnLogin.style.display = 'inline-flex';
+      btnLogout.style.display = 'none';
+    }
+  }
+  btnLogin.addEventListener('click', async ()=> {
     try { await signInWithPopup(auth, provider); }
     catch(e){ alert('Falha no login: ' + e.message); }
   });
-  $('#btnLogout').addEventListener('click', async ()=> { await signOut(auth); });
+  btnLogout.addEventListener('click', async ()=> { await signOut(auth); });
 
   onAuthStateChanged(auth, async (user)=>{
     currentUser = user || null;
     $('#who').textContent = user ? (user.displayName || user.email) : '—';
+    updateAuthButtons(user);
     if(user){ await carregarPreferencias(); }
   });
 
@@ -393,7 +406,7 @@
     }));
   }
 
-  // ------------------ Fixos ------------------
+  // ------------------ Fixos (mobílias) ------------------
   const fixoFormato=$('#fixoFormato'), labFixo1=$('#labFixo1'), labFixo2=$('#labFixo2');
   function syncFixoLabels(){
     if(fixoFormato.value==='circular'){ labFixo1.firstChild.textContent='Diâmetro (cm)'; labFixo2.firstChild.textContent='— (ignorado)'; }
@@ -521,33 +534,52 @@
     }catch(e){ console.error(e); alert('Falha ao gerar PDF. Use “Imprimir” > Salvar como PDF.'); window.print(); }
   }
 
-  // ------------------ Firebase: salvar/carregar ------------------
+  // ------------------ Firebase: salvar/carregar PREFERÊNCIAS ------------------
+  // Agora SÓ salva: tipo + dimensões do forno, e a lista de FIXOS (mobílias).
   async function salvarPreferencias(){
     if(!currentUser) return alert('Faça login primeiro.');
+
     const formato=$('#fornoFormato').value;
     let defaultKiln={formato};
     if(formato==='circular'){ defaultKiln.diam=num($('#fornoDiam').value); defaultKiln.alt=num($('#fornoAlt').value); }
     else if(formato==='retangular'){ defaultKiln.larg=num($('#fornoLarg').value); defaultKiln.prof=num($('#fornoProf').value); defaultKiln.alt=num($('#fornoAlt').value); }
     else { defaultKiln.n=parseInt($('#fornoNLados').value||0,10); defaultKiln.diam=num($('#fornoDiam').value); defaultKiln.alt=num($('#fornoAlt').value); }
-    const precoFornoCheio=num($('#precoFornoCheio').value); const tipoQueimaPadrao=$('#tipoQueima').value;
-    await setDoc(doc(db,'users',currentUser.uid), { defaultKiln, precoFornoCheio, tipoQueimaPadrao }, { merge:true });
-    alert('Preferências salvas.');
+
+    const defaultFixos = fixos.map(f=>({desc:f.desc, formato:f.formato, d1:f.d1, d2:f.d2, alt:f.alt, qtd:f.qtd}));
+
+    await setDoc(doc(db,'users',currentUser.uid), {
+      defaultKiln,
+      defaultFixos
+    }, { merge:true });
+
+    alert('Preferências salvas (forno + mobílias).');
   }
 
   async function carregarPreferencias(){
     if(!currentUser) return;
     const snap=await getDoc(doc(db,'users',currentUser.uid)); if(!snap.exists()) return;
     const d=snap.data();
+
+    // Forno
     if(d.defaultKiln){
       $('#fornoFormato').value=d.defaultKiln.formato||'circular'; renderFornoCampos();
       if(d.defaultKiln.formato==='circular'){ $('#fornoDiam').value=d.defaultKiln.diam??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
       else if(d.defaultKiln.formato==='retangular'){ $('#fornoLarg').value=d.defaultKiln.larg??''; $('#fornoProf').value=d.defaultKiln.prof??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
       else { $('#fornoNLados').value=d.defaultKiln.n??''; $('#fornoDiam').value=d.defaultKiln.diam??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
     }
-    if(typeof d.precoFornoCheio==='number') $('#precoFornoCheio').value=d.precoFornoCheio;
-    if(d.tipoQueimaPadrao) $('#tipoQueima').value=d.tipoQueimaPadrao;
+
+    // Mobílias (fixos)
+    if(Array.isArray(d.defaultFixos)){
+      fixos.length = 0;
+      d.defaultFixos.forEach(f=>{
+        const volUnit = f.formato==='circular' ? areaBaseCircular(f.d1)*f.alt : areaBaseRetangular(f.d1,f.d2)*f.alt;
+        fixos.push({desc:f.desc, formato:f.formato, d1:f.d1, d2:f.d2||0, alt:f.alt, qtd:f.qtd, volUnit});
+      });
+      renderTabelaFixos();
+    }
   }
 
+  // ------------------ Firebase: salvar uma QUEIMA (histórico) ------------------
   async function salvarQueima(){
     if(!currentUser) return alert('Faça login primeiro.');
     if(typeof calcular==='function') calcular();
@@ -565,6 +597,12 @@
     alert('Queima salva. ID: '+ref.id);
   }
 
+  // Ganchos UI Firebase
+  $('#btnSavePrefs').addEventListener('click', salvarPreferencias);
+  $('#btnLoadPrefs').addEventListener('click', carregarPreferencias);
+  $('#btnSaveJob').addEventListener('click', salvarQueima);
+
+  // ------------------ Helpers ------------------
   function sanitItem(x){ return { desc:x.desc, formato:x.formato, d1:x.d1, d2:x.d2, alt:x.alt, qtd:x.qtd }; }
   function snapshotForno(){
     const formato=$('#fornoFormato').value;
@@ -573,13 +611,6 @@
     return {formato, n:parseInt($('#fornoNLados').value||0,10), diam:num($('#fornoDiam').value), alt:num($('#fornoAlt').value)};
   }
   function num(v){ const n=parseFloat(v||0); return isFinite(n)?n:0; }
-
-  // Ganchos UI Firebase
-  $('#btnSavePrefs').addEventListener('click', salvarPreferencias);
-  $('#btnLoadPrefs').addEventListener('click', carregarPreferencias);
-  $('#btnSaveJob').addEventListener('click', salvarQueima);
-
-  // ------------------ Helpers ------------------
   function fmt(x){ if(!isFinite(x)||x===0) return '0'; return Number(x).toFixed(2); }
   function money(x){ return Number(x).toFixed(2).replace('.',','); }
   function escapeHTML(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
