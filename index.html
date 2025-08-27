@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Calculadora de Ocupação do Forno – Genérica</title>
+<title>Calculadora de Ocupação do Forno – com Firebase</title>
 
-<!-- jsPDF e AutoTable (para gerar PDF simplificado) -->
+<!-- jsPDF + AutoTable para gerar o PDF simplificado -->
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-  :root{
-    --bg:#0f1115; --card:#161a22; --ink:#eaf0ff; --muted:#9aa3b2; --accent:#5dd4c6;
-    --line:#242a35; --warn:#f2c94c; --bad:#ef6b6b; --good:#3bd16f;
-  }
+  :root{ --bg:#0f1115; --card:#161a22; --ink:#eaf0ff; --muted:#9aa3b2; --accent:#5dd4c6; --line:#242a35; --warn:#f2c94c; --bad:#ef6b6b; --good:#3bd16f; }
   *{box-sizing:border-box}
   body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink);}
-  header{padding:20px; text-align:center;}
+  header{padding:16px; text-align:center; background:#161a22; border-bottom:1px solid var(--line)}
   header h1{margin:0 0 6px 0; font-size:22px}
-  header p{margin:0; color:var(--muted); font-size:14px}
-  .wrap{max-width:1000px; margin:0 auto; padding:16px}
+  header .bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; max-width:1100px; margin:6px auto 0}
+  .muted{color:var(--muted)}
+  main{max-width:1100px; margin:0 auto; padding:16px}
   .grid{display:grid; gap:12px}
   @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
   .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px}
@@ -27,7 +25,7 @@
   label{display:block; font-size:13px; color:var(--muted); margin-top:8px}
   input,select{width:100%; background:#0e131a; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px; margin-top:4px}
   .row{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
-  .row > *{grid-column:span 12}
+  .row>*{grid-column:span 12}
   .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#0e131a; color:var(--ink); cursor:pointer}
   .btn:hover{border-color:#334155}
   .btn.primary{background:var(--accent); color:#072723; border-color:transparent; font-weight:600}
@@ -36,602 +34,557 @@
   table{width:100%; border-collapse:collapse; margin-top:10px; font-size:13px}
   th,td{border-bottom:1px solid var(--line); padding:8px; text-align:center}
   th{color:var(--muted); font-weight:600; background:#121722}
-  .hint{font-size:12px; color:var(--muted)}
   .result{display:grid; gap:10px}
   .stat{background:#101622; border:1px solid var(--line); border-radius:12px; padding:12px}
-  .stat b{font-size:18px}
   .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
-  .stack{display:flex; gap:8px; flex-wrap:wrap}
-  @media print {
-    body{background:#fff; color:#000}
-    .card{border:0}
-    .btn{display:none}
-  }
+  @media print { body{background:#fff; color:#000} .card{border:0} .btn{display:none} }
 </style>
 </head>
 <body>
 <header>
-  <h1>Calculadora de Ocupação do Forno</h1>
-  <p>Genérica para qualquer formato de forno e peças. Unidades em centímetros (cm) e cm³.</p>
+  <h1>Calculadora de Ocupação do Forno — com Login</h1>
+  <div class="bar">
+    <div class="muted">Usuário: <span id="who">—</span></div>
+    <div>
+      <button id="btnLogin" class="btn primary">Entrar com Google</button>
+      <button id="btnLogout" class="btn">Sair</button>
+    </div>
+  </div>
+  <div class="muted" style="margin-top:6px">Faça login, ajuste seu forno/preço, adicione peças e gere o PDF para o cliente.</div>
 </header>
 
-<div class="wrap grid">
-  <!-- Forno -->
-  <section class="card">
-    <h3>1) Dimensões do Forno</h3>
-    <label>Formato do forno
-      <select id="fornoFormato">
-        <option value="circular">Circular (cilindro)</option>
-        <option value="retangular">Retangular / Cúbico (paralelepípedo)</option>
-        <option value="poligonal">Poligonal regular (ex.: decágono)</option>
-      </select>
-    </label>
+<main>
+  <div class="grid">
+    <!-- Forno -->
+    <section class="card">
+      <h3>1) Dimensões do Forno</h3>
+      <label>Formato do forno
+        <select id="fornoFormato">
+          <option value="circular">Circular (cilindro)</option>
+          <option value="retangular">Retangular / Cúbico</option>
+          <option value="poligonal">Poligonal regular (ex.: decágono)</option>
+        </select>
+      </label>
+      <div id="fornoCampos" class="row" style="margin-top:6px"></div>
+      <p class="muted" id="fornoAjuda" style="margin-top:8px"></p>
+    </section>
 
-    <div id="fornoCampos" class="row" style="margin-top:6px"></div>
-    <p class="hint" id="fornoAjuda" style="margin-top:8px"></p>
-  </section>
+    <!-- Preço e cálculo -->
+    <section class="card">
+      <h3>2) Preço do Forno Cheio e Tipo de Queima</h3>
+      <label>Tipo de queima
+        <select id="tipoQueima">
+          <option value="Biscoito">Biscoito</option>
+          <option value="Alta Temperatura / Esmalte">Alta Temperatura / Esmalte</option>
+        </select>
+      </label>
+      <label>Valor do forno cheio (R$)
+        <input type="number" id="precoFornoCheio" min="0" step="0.01" placeholder="Ex.: 200 ou 400" />
+      </label>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px">
+        <button class="btn primary" id="btnCalcular">Calcular</button>
+        <button class="btn" id="btnGerarPDF">Gerar PDF</button>
+        <button class="btn ghost" id="btnLimparTudo">Limpar tudo</button>
+      </div>
+    </section>
 
-  <!-- Preço e cálculo -->
-  <section class="card">
-    <h3>2) Preço do Forno Cheio e Tipo de Queima</h3>
-    <label>Tipo de queima (apenas rótulo informativo)
-      <select id="tipoQueima">
-        <option value="Biscoito">Biscoito</option>
-        <option value="Alta Temperatura / Esmalte">Alta Temperatura / Esmalte</option>
-      </select>
-    </label>
-    <label>Valor do forno cheio (R$) – você define
-      <input type="number" id="precoFornoCheio" min="0" step="0.01" placeholder="Ex.: 200 ou 400" />
-    </label>
-    <div class="stack" style="margin-top:10px">
-      <button class="btn primary" id="btnCalcular">Calcular</button>
-      <button class="btn" id="btnGerarPDF" title="Gera um PDF para o cliente">Gerar PDF</button>
-      <button class="btn ghost" id="btnLimparTudo" title="Limpa todas as listas">Limpar tudo</button>
-    </div>
-  </section>
+    <!-- Peças -->
+    <section class="card" style="grid-column:1 / -1">
+      <h3>3) Adicionar Peças</h3>
+      <div class="row">
+        <div style="grid-column:span 3">
+          <label>Formato
+            <select id="pecaFormato">
+              <option value="circular">Circular (base circular)</option>
+              <option value="retangular">Retangular (base L×P)</option>
+            </select>
+          </label>
+        </div>
+        <div style="grid-column:span 3">
+          <label>Descrição
+            <input type="text" id="pecaDesc" placeholder="Ex.: Caneca 300 ml" />
+          </label>
+        </div>
+        <div style="grid-column:span 2">
+          <label id="labDim1">Diâmetro / Largura (cm)
+            <input type="number" id="pecaDim1" min="0" step="0.1" />
+          </label>
+        </div>
+        <div style="grid-column:span 2">
+          <label id="labDim2">Altura / Profundidade (cm)
+            <input type="number" id="pecaDim2" min="0" step="0.1" />
+          </label>
+        </div>
+        <div style="grid-column:span 2">
+          <label>Altura (cm)
+            <input type="number" id="pecaAlt" min="0" step="0.1" />
+          </label>
+        </div>
+        <div style="grid-column:span 2">
+          <label>Quantidade
+            <input type="number" id="pecaQtd" min="1" step="1" value="1" />
+          </label>
+        </div>
+        <div style="grid-column:span 2; align-self:end">
+          <button class="btn" id="btnAddPeca">Adicionar peça</button>
+        </div>
+      </div>
 
-  <!-- Peças -->
-  <section class="card" style="grid-column:1 / -1">
-    <h3>3) Adicionar Peças</h3>
-    <div class="row">
-      <div style="grid-column:span 3">
-        <label>Formato
-          <select id="pecaFormato">
-            <option value="circular">Circular (base circular)</option>
-            <option value="retangular">Retangular (base L×P)</option>
-          </select>
-        </label>
-      </div>
-      <div style="grid-column:span 3">
-        <label>Descrição
-          <input type="text" id="pecaDesc" placeholder="Ex.: Caneca 300 ml" />
-        </label>
-      </div>
-      <div style="grid-column:span 2">
-        <label id="labDim1">Diâmetro / Largura (cm)
-          <input type="number" id="pecaDim1" min="0" step="0.1" />
-        </label>
-      </div>
-      <div style="grid-column:span 2">
-        <label id="labDim2">Altura / Profundidade (cm)
-          <input type="number" id="pecaDim2" min="0" step="0.1" />
-        </label>
-      </div>
-      <div style="grid-column:span 2">
-        <label>Altura (cm)
-          <input type="number" id="pecaAlt" min="0" step="0.1" />
-        </label>
-      </div>
-      <div style="grid-column:span 2">
-        <label>Quantidade
-          <input type="number" id="pecaQtd" min="1" step="1" value="1" />
-        </label>
-      </div>
-      <div style="grid-column:span 2; align-self:end">
-        <button class="btn" id="btnAddPeca">Adicionar peça</button>
-      </div>
-    </div>
+      <table id="tblPecas">
+        <thead>
+          <tr>
+            <th>#</th><th>Descrição</th><th>Formato</th>
+            <th>Dimensões base</th><th>Altura</th><th>Qtd</th>
+            <th>Volume por peça (cm³)</th><th>Volume total (cm³)</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-    <table id="tblPecas">
-      <thead>
-        <tr>
-          <th>#</th><th>Descrição</th><th>Formato</th>
-          <th>Dimensões base</th><th>Altura</th><th>Qtd</th>
-          <th>Volume por peça (cm³)</th><th>Volume total (cm³)</th><th>Ações</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+    <!-- Ocupações fixas -->
+    <section class="card" style="grid-column:1 / -1">
+      <h3>4) Ocupações Fixas do Forno (opcional)</h3>
+      <p class="muted">Use para prateleiras e suportes. Esses volumes são subtraídos do volume total do forno.</p>
 
-  <!-- Ocupações fixas -->
-  <section class="card" style="grid-column:1 / -1">
-    <h3>4) Ocupações Fixas do Forno (opcional)</h3>
-    <p class="hint">Use para prateleiras, suportes, colunas etc. Esses volumes serão <b>subtraídos</b> do volume total do forno.</p>
-
-    <div class="row">
-      <div style="grid-column:span 4">
-        <label>Descrição
-          <input type="text" id="fixoDesc" placeholder="Ex.: Prateleira Ø60×2cm (5 un.)" />
-        </label>
+      <div class="row">
+        <div style="grid-column:span 4">
+          <label>Descrição
+            <input type="text" id="fixoDesc" placeholder="Ex.: Prateleira Ø60×2cm (5 un.)" />
+          </label>
+        </div>
+        <div style="grid-column:span 3">
+          <label>Formato
+            <select id="fixoFormato">
+              <option value="circular">Circular (base circular)</option>
+              <option value="retangular">Retangular (base L×P)</option>
+            </select>
+          </label>
+        </div>
+        <div style="grid-column:span 2">
+          <label id="labFixo1">Diâmetro / Largura (cm)
+            <input type="number" id="fixoDim1" min="0" step="0.1" />
+          </label>
+        </div>
+        <div style="grid-column:span 2">
+          <label id="labFixo2">Altura / Profundidade (cm)
+            <input type="number" id="fixoDim2" min="0" step="0.1" />
+          </label>
+        </div>
+        <div style="grid-column:span 1">
+          <label>Altura (cm)
+            <input type="number" id="fixoAlt" min="0" step="0.1" />
+          </label>
+        </div>
+        <div style="grid-column:span 1">
+          <label>Qtd
+            <input type="number" id="fixoQtd" min="1" step="1" value="1" />
+          </label>
+        </div>
+        <div style="grid-column:span 2; align-self:end">
+          <button class="btn" id="btnAddFixo">Adicionar fixo</button>
+        </div>
       </div>
-      <div style="grid-column:span 3">
-        <label>Formato
-          <select id="fixoFormato">
-            <option value="circular">Circular (base circular)</option>
-            <option value="retangular">Retangular (base L×P)</option>
-          </select>
-        </label>
+
+      <table id="tblFixos">
+        <thead>
+          <tr>
+            <th>#</th><th>Descrição</th><th>Formato</th>
+            <th>Dimensões base</th><th>Altura</th><th>Qtd</th>
+            <th>Volume por item (cm³)</th><th>Volume total (cm³)</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+        <button class="btn ghost" id="btnExemploFixos">Preencher exemplo (prateleiras+suportes)</button>
+        <button class="btn ghost" id="btnLimparFixos">Limpar fixos</button>
       </div>
-      <div style="grid-column:span 2">
-        <label id="labFixo1">Diâmetro / Largura (cm)
-          <input type="number" id="fixoDim1" min="0" step="0.1" />
-        </label>
+    </section>
+
+    <!-- Resultado (para conferência interna; o PDF não mostra volumes) -->
+    <section class="card" style="grid-column:1 / -1">
+      <h3>5) Resultado</h3>
+      <div class="result">
+        <div class="stat">Volume do forno (bruto): <b id="volForno">—</b> cm³</div>
+        <div class="stat">Volume ocupado por fixos: <b id="volFixos">—</b> cm³</div>
+        <div class="stat">Volume útil do forno (após fixos): <b id="volUtil">—</b> cm³</div>
+        <div class="stat">Volume das peças: <b id="volPecas">—</b> cm³</div>
+        <div class="stat">Ocupação: <b id="pctOcup">—</b> <span id="pctBadge"></span></div>
+        <div class="stat">Tipo de queima: <b id="outQueima">—</b></div>
+        <div class="stat">Valor do forno cheio: <b id="outCheio">—</b></div>
+        <div class="stat">Valor proporcional a pagar: <b id="outPagar">—</b></div>
       </div>
-      <div style="grid-column:span 2">
-        <label id="labFixo2">Altura / Profundidade (cm)
-          <input type="number" id="fixoDim2" min="0" step="0.1" />
-        </label>
+    </section>
+
+    <!-- Ações Firebase -->
+    <section class="card" style="grid-column:1 / -1">
+      <h3>6) Salvar/Carregar (Firebase)</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button id="btnLoadPrefs" class="btn">Carregar preferências</button>
+        <button id="btnSavePrefs" class="btn">Salvar preferências</button>
+        <button id="btnSaveJob" class="btn primary">Salvar QUEIMA (histórico)</button>
       </div>
-      <div style="grid-column:span 1">
-        <label>Altura (cm)
-          <input type="number" id="fixoAlt" min="0" step="0.1" />
-        </label>
-      </div>
-      <div style="grid-column:span 1">
-        <label>Qtd
-          <input type="number" id="fixoQtd" min="1" step="1" value="1" />
-        </label>
-      </div>
-      <div style="grid-column:span 2; align-self:end">
-        <button class="btn" id="btnAddFixo">Adicionar fixo</button>
-      </div>
-    </div>
+      <p class="muted" style="margin-top:6px">Preferências: dimensões do forno, tipo de queima padrão e valor do forno cheio.  
+      “Salvar QUEIMA” guarda esta montagem em <code>/users/{uid}/queimas</code>.</p>
+    </section>
+  </div>
+</main>
 
-    <table id="tblFixos">
-      <thead>
-        <tr>
-          <th>#</th><th>Descrição</th><th>Formato</th>
-          <th>Dimensões base</th><th>Altura</th><th>Qtd</th>
-          <th>Volume por item (cm³)</th><th>Volume total (cm³)</th><th>Ações</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+<!-- Firebase (modular v10+) -->
+<script type="module">
+  // ------------------ Firebase SDK ------------------
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    <div class="stack" style="margin-top:8px">
-      <button class="btn ghost" id="btnExemploFixos">Preencher exemplo (prateleiras+suportes)</button>
-      <button class="btn ghost" id="btnLimparFixos">Limpar fixos</button>
-    </div>
-  </section>
+  // === SEU CONFIG ===
+  const firebaseConfig = {
+    apiKey: "AIzaSyDb2fh4EBCz3202FUeTaIxg8qJiQGXrfHk",
+    authDomain: "usuario-ceramica.firebaseapp.com",
+    projectId: "usuario-ceramica",
+    storageBucket: "usuario-ceramica.firebasestorage.app",
+    messagingSenderId: "603189447452",
+    appId: "1:603189447452:web:b80ceacbe358cffc0d48d9",
+    measurementId: "G-VTY7WVGK3T"
+  };
 
-  <!-- Resultado (para você acompanhar; o PDF não usa esses detalhes) -->
-  <section class="card" style="grid-column:1 / -1">
-    <h3>5) Resultado</h3>
-    <div class="result">
-      <div class="stat">Volume do forno (bruto): <b id="volForno">—</b> cm³</div>
-      <div class="stat">Volume ocupado por fixos: <b id="volFixos">—</b> cm³</div>
-      <div class="stat">Volume útil do forno (após fixos): <b id="volUtil">—</b> cm³</div>
-      <div class="stat">Volume das peças: <b id="volPecas">—</b> cm³</div>
-      <div class="stat">Ocupação: <b id="pctOcup">—</b> <span id="pctBadge"></span></div>
-      <div class="stat">Tipo de queima: <b id="outQueima">—</b></div>
-      <div class="stat">Valor do forno cheio: <b id="outCheio">—</b></div>
-      <div class="stat">Valor proporcional a pagar: <b id="outPagar">—</b></div>
-    </div>
-  </section>
-</div>
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  const provider = new GoogleAuthProvider();
 
-<script>
-  // ---------- Folgas automáticas (não exibidas na UI) ----------
-  const FOLGA_LATERAL = 2;   // cm por lado (aplicado na base: +4 cm no diâmetro / +2 cm em cada eixo retangular)
-  const FOLGA_VERTICAL = 2;  // cm adicionados à altura efetiva
+  // Helpers DOM
+  const $ = s => document.querySelector(s);
+  let currentUser = null;
 
-  // ---------- Utilidades geométricas ----------
-  function areaBaseCircular(d){ const r = d/2; return Math.PI * r * r; }
-  function areaBaseRetangular(l,p){ return l * p; }
-  function areaBasePoligono(ngons, diametroCirc){ 
-    const n = Math.max(3, parseInt(ngons||0,10));
-    const R = diametroCirc/2;
-    return (n/2) * R*R * Math.sin((2*Math.PI)/n);
-  }
+  // Login/Logout
+  $('#btnLogin').addEventListener('click', async ()=> {
+    try { await signInWithPopup(auth, provider); }
+    catch(e){ alert('Falha no login: ' + e.message); }
+  });
+  $('#btnLogout').addEventListener('click', async ()=> { await signOut(auth); });
 
-  // ---------- Estado ----------
-  const pecas = [];
-  const fixos = [];
-  let ultimoResultado = null; // para PDF e rateio
+  onAuthStateChanged(auth, async (user)=>{
+    currentUser = user || null;
+    $('#who').textContent = user ? (user.displayName || user.email) : '—';
+    if(user){ await carregarPreferencias(); }
+  });
 
-  // ---------- DOM curto ----------
-  const $ = sel => document.querySelector(sel);
+  // ------------------ Folgas automáticas ------------------
+  const FOLGA_LATERAL = 2;   // cm por lado (base)
+  const FOLGA_VERTICAL = 2;  // cm na altura
 
-  // ---------- Forno: campos dinâmicos ----------
+  // ------------------ Geometria ------------------
+  function areaBaseCircular(d){ const r=d/2; return Math.PI*r*r; }
+  function areaBaseRetangular(l,p){ return l*p; }
+  function areaBasePoligono(n, dCirc){ n=Math.max(3,parseInt(n||0,10)); const R=dCirc/2; return (n/2)*R*R*Math.sin((2*Math.PI)/n); }
+
+  // ------------------ Estado ------------------
+  const pecas=[]; const fixos=[];
+  let ultimoResultado=null;
+
+  // ------------------ Forno (UI dinâmica) ------------------
   const fornoFormato = $('#fornoFormato');
-  const fornoCampos = $('#fornoCampos');
-  const fornoAjuda  = $('#fornoAjuda');
+  const fornoCampos  = $('#fornoCampos');
+  const fornoAjuda   = $('#fornoAjuda');
 
   function renderFornoCampos(){
     const fmt = fornoFormato.value;
-    if(fmt === 'circular'){
+    if(fmt==='circular'){
       fornoCampos.innerHTML = `
         <div style="grid-column:span 6">
-          <label>Diâmetro interno (cm)
-            <input type="number" id="fornoDiam" min="0" step="0.1" value="60" />
-          </label>
+          <label>Diâmetro interno (cm)<input type="number" id="fornoDiam" value="60" step="0.1" min="0"/></label>
         </div>
         <div style="grid-column:span 6">
-          <label>Altura interna (cm)
-            <input type="number" id="fornoAlt" min="0" step="0.1" value="70" />
-          </label>
+          <label>Altura interna (cm)<input type="number" id="fornoAlt" value="70" step="0.1" min="0"/></label>
         </div>`;
-      fornoAjuda.textContent = 'Cálculo: volume = π·(d/2)²·altura.';
-    } else if(fmt === 'retangular'){
+      fornoAjuda.textContent='Volume = π·(d/2)²·altura.';
+    }else if(fmt==='retangular'){
       fornoCampos.innerHTML = `
         <div style="grid-column:span 4">
-          <label>Largura interna (cm)
-            <input type="number" id="fornoLarg" min="0" step="0.1" />
-          </label>
+          <label>Largura (cm)<input type="number" id="fornoLarg" step="0.1" min="0"/></label>
         </div>
         <div style="grid-column:span 4">
-          <label>Profundidade interna (cm)
-            <input type="number" id="fornoProf" min="0" step="0.1" />
-          </label>
+          <label>Profundidade (cm)<input type="number" id="fornoProf" step="0.1" min="0"/></label>
         </div>
         <div style="grid-column:span 4">
-          <label>Altura interna (cm)
-            <input type="number" id="fornoAlt" min="0" step="0.1" />
-          </label>
+          <label>Altura (cm)<input type="number" id="fornoAlt" step="0.1" min="0"/></label>
         </div>`;
-      fornoAjuda.textContent = 'Cálculo: volume = largura·profundidade·altura.';
-    } else {
+      fornoAjuda.textContent='Volume = largura·profundidade·altura.';
+    }else{
       fornoCampos.innerHTML = `
         <div style="grid-column:span 4">
-          <label>Nº de lados (≥3)
-            <input type="number" id="fornoNLados" min="3" step="1" value="10" />
-          </label>
+          <label>Nº de lados (≥3)<input type="number" id="fornoNLados" value="10" step="1" min="3"/></label>
         </div>
         <div style="grid-column:span 4">
-          <label>Diâmetro circunscrito (cm)
-            <input type="number" id="fornoDiam" min="0" step="0.1" value="60" />
-          </label>
+          <label>Diâmetro circunscrito (cm)<input type="number" id="fornoDiam" value="60" step="0.1" min="0"/></label>
         </div>
         <div style="grid-column:span 4">
-          <label>Altura interna (cm)
-            <input type="number" id="fornoAlt" min="0" step="0.1" value="70" />
-          </label>
+          <label>Altura (cm)<input type="number" id="fornoAlt" value="70" step="0.1" min="0"/></label>
         </div>`;
-      fornoAjuda.textContent = 'Área da base = (n/2)·R²·sen(2π/n). Volume = área·altura. Para decágono use n=10.';
+      fornoAjuda.textContent='Área da base = (n/2)·R²·sen(2π/n); Volume = área·altura.';
     }
   }
   fornoFormato.addEventListener('change', renderFornoCampos);
   renderFornoCampos();
 
   function volumeForno(){
-    const fmt = fornoFormato.value;
-    if(fmt === 'circular'){
-      const d = parseFloat($('#fornoDiam').value||0);
-      const h = parseFloat($('#fornoAlt').value||0);
-      return areaBaseCircular(d) * h;
-    } else if(fmt === 'retangular'){
-      const L = parseFloat($('#fornoLarg').value||0);
-      const P = parseFloat($('#fornoProf').value||0);
-      const H = parseFloat($('#fornoAlt').value||0);
-      return areaBaseRetangular(L,P) * H;
-    } else {
-      const n  = parseInt($('#fornoNLados').value||0,10);
-      const d  = parseFloat($('#fornoDiam').value||0);
-      const h  = parseFloat($('#fornoAlt').value||0);
-      return areaBasePoligono(n, d) * h;
-    }
-  }
-
-  // ---------- Peças ----------
-  const pecaFormato = $('#pecaFormato');
-  const labDim1 = $('#labDim1');
-  const labDim2 = $('#labDim2');
-
-  function syncPecaLabels(){
-    if(pecaFormato.value === 'circular'){
-      labDim1.firstChild.textContent = 'Diâmetro (cm)';
-      labDim2.firstChild.textContent = '— (ignorado)';
+    const fmt=fornoFormato.value;
+    if(fmt==='circular'){
+      const d=parseFloat($('#fornoDiam').value||0), h=parseFloat($('#fornoAlt').value||0);
+      return areaBaseCircular(d)*h;
+    }else if(fmt==='retangular'){
+      const L=parseFloat($('#fornoLarg').value||0), P=parseFloat($('#fornoProf').value||0), H=parseFloat($('#fornoAlt').value||0);
+      return areaBaseRetangular(L,P)*H;
     }else{
-      labDim1.firstChild.textContent = 'Largura (cm)';
-      labDim2.firstChild.textContent = 'Profundidade (cm)';
+      const n=parseInt($('#fornoNLados').value||0,10), d=parseFloat($('#fornoDiam').value||0), h=parseFloat($('#fornoAlt').value||0);
+      return areaBasePoligono(n,d)*h;
     }
   }
-  pecaFormato.addEventListener('change', syncPecaLabels);
-  syncPecaLabels();
 
-  $('#btnAddPeca').addEventListener('click', () => {
-    const formato = pecaFormato.value;
-    const desc = ($('#pecaDesc').value||'').trim();
-    const d1 = parseFloat($('#pecaDim1').value||0); // diâmetro ou largura
-    const d2 = parseFloat($('#pecaDim2').value||0); // ignorado p/ circular, profundidade p/ retangular
-    const alt = parseFloat($('#pecaAlt').value||0);
-    const qtd = parseInt($('#pecaQtd').value||0,10);
+  // ------------------ Peças ------------------
+  const pecaFormato=$('#pecaFormato'), labDim1=$('#labDim1'), labDim2=$('#labDim2');
+  function syncPecaLabels(){
+    if(pecaFormato.value==='circular'){ labDim1.firstChild.textContent='Diâmetro (cm)'; labDim2.firstChild.textContent='— (ignorado)'; }
+    else{ labDim1.firstChild.textContent='Largura (cm)'; labDim2.firstChild.textContent='Profundidade (cm)'; }
+  }
+  pecaFormato.addEventListener('change', syncPecaLabels); syncPecaLabels();
 
-    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){
-      alert('Preencha descrição, dimensões válidas, altura e quantidade.');
-      return;
-    }
+  $('#btnAddPeca').addEventListener('click',()=>{
+    const formato=pecaFormato.value;
+    const desc=($('#pecaDesc').value||'').trim();
+    const d1=parseFloat($('#pecaDim1').value||0);
+    const d2=parseFloat($('#pecaDim2').value||0);
+    const alt=parseFloat($('#pecaAlt').value||0);
+    const qtd=parseInt($('#pecaQtd').value||0,10);
+    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){ alert('Preencha descrição, dimensões válidas, altura e quantidade.'); return; }
 
-    // APLICA FOLGAS AUTOMÁTICAS (sem mostrar na UI)
+    // FOLGAS automáticas
     const altEfetiva = alt + FOLGA_VERTICAL;
     let volUnit;
     if(formato==='circular'){
-      const dEfetivo = d1 + 2*FOLGA_LATERAL;          // +2 cm por lado na base → +4 cm no diâmetro
-      const base = areaBaseCircular(dEfetivo);
-      volUnit = base * altEfetiva;
+      const dEf = d1 + 2*FOLGA_LATERAL;
+      volUnit = areaBaseCircular(dEf)*altEfetiva;
     }else{
-      const largEfetiva = d1 + 2*FOLGA_LATERAL;       // +2 cm por lado em cada eixo
-      const profEfetiva = d2 + 2*FOLGA_LATERAL;
-      const base = areaBaseRetangular(largEfetiva, profEfetiva);
-      volUnit = base * altEfetiva;
+      const L = d1 + 2*FOLGA_LATERAL;
+      const P = d2 + 2*FOLGA_LATERAL;
+      volUnit = areaBaseRetangular(L,P)*altEfetiva;
     }
-
-    pecas.push({desc, formato, d1, d2: formato==='circular'? 0 : d2, alt, qtd, volUnit});
+    pecas.push({desc, formato, d1, d2: formato==='circular'?0:d2, alt, qtd, volUnit});
     renderTabelaPecas();
   });
 
   function renderTabelaPecas(){
-    const tb = document.querySelector('#tblPecas tbody');
-    tb.innerHTML = '';
-    pecas.forEach((p, i) => {
-      const baseTxt = p.formato==='circular'
-        ? `Ø ${fmt(p.d1)}`
-        : `${fmt(p.d1)} × ${fmt(p.d2)}`;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${i+1}</td>
-        <td>${escapeHTML(p.desc)}</td>
-        <td>${p.formato}</td>
-        <td>${baseTxt}</td>
-        <td>${fmt(p.alt)}</td>
-        <td>${p.qtd}</td>
-        <td>${fmt(p.volUnit)}</td>
-        <td>${fmt(p.volUnit * p.qtd)}</td>
-        <td><button class="btn danger" data-i="${i}">Remover</button></td>
-      `;
+    const tb=document.querySelector('#tblPecas tbody'); tb.innerHTML='';
+    pecas.forEach((p,i)=>{
+      const baseTxt = p.formato==='circular'? `Ø ${fmt(p.d1)}` : `${fmt(p.d1)} × ${fmt(p.d2)}`;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${i+1}</td><td>${escapeHTML(p.desc)}</td><td>${p.formato}</td>
+        <td>${baseTxt}</td><td>${fmt(p.alt)}</td><td>${p.qtd}</td>
+        <td>${fmt(p.volUnit)}</td><td>${fmt(p.volUnit*p.qtd)}</td>
+        <td><button class="btn danger" data-i="${i}">Remover</button></td>`;
       tb.appendChild(tr);
     });
-    tb.querySelectorAll('button[data-i]').forEach(btn=>{
-      btn.addEventListener('click', e=>{
-        const idx = parseInt(e.currentTarget.getAttribute('data-i'),10);
-        if(!isNaN(idx)){ pecas.splice(idx,1); renderTabelaPecas(); }
-      });
-    });
+    tb.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('click',e=>{
+      const idx=parseInt(e.currentTarget.getAttribute('data-i'),10); if(!isNaN(idx)){ pecas.splice(idx,1); renderTabelaPecas(); }
+    }));
   }
 
-  // ---------- Fixos ----------
-  const fixoFormato = $('#fixoFormato');
-  const labFixo1 = $('#labFixo1');
-  const labFixo2 = $('#labFixo2');
-
+  // ------------------ Fixos ------------------
+  const fixoFormato=$('#fixoFormato'), labFixo1=$('#labFixo1'), labFixo2=$('#labFixo2');
   function syncFixoLabels(){
-    if(fixoFormato.value === 'circular'){
-      labFixo1.firstChild.textContent = 'Diâmetro (cm)';
-      labFixo2.firstChild.textContent = '— (ignorado)';
-    }else{
-      labFixo1.firstChild.textContent = 'Largura (cm)';
-      labFixo2.firstChild.textContent = 'Profundidade (cm)';
-    }
+    if(fixoFormato.value==='circular'){ labFixo1.firstChild.textContent='Diâmetro (cm)'; labFixo2.firstChild.textContent='— (ignorado)'; }
+    else{ labFixo1.firstChild.textContent='Largura (cm)'; labFixo2.firstChild.textContent='Profundidade (cm)'; }
   }
-  fixoFormato.addEventListener('change', syncFixoLabels);
-  syncFixoLabels();
+  fixoFormato.addEventListener('change', syncFixoLabels); syncFixoLabels();
 
-  $('#btnAddFixo').addEventListener('click', () => {
-    const formato = fixoFormato.value;
-    const desc = ($('#fixoDesc').value||'').trim();
-    const d1 = parseFloat($('#fixoDim1').value||0);
-    const d2 = parseFloat($('#fixoDim2').value||0);
-    const alt = parseFloat($('#fixoAlt').value||0);
-    const qtd = parseInt($('#fixoQtd').value||0,10);
+  $('#btnAddFixo').addEventListener('click',()=>{
+    const formato=fixoFormato.value;
+    const desc=($('#fixoDesc').value||'').trim();
+    const d1=parseFloat($('#fixoDim1').value||0);
+    const d2=parseFloat($('#fixoDim2').value||0);
+    const alt=parseFloat($('#fixoAlt').value||0);
+    const qtd=parseInt($('#fixoQtd').value||0,10);
+    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){ alert('Preencha descrição, dimensões válidas, altura e quantidade.'); return; }
 
-    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){
-      alert('Preencha descrição, dimensões válidas, altura e quantidade.');
-      return;
-    }
-
-    // NÃO aplicamos folgas nos FIXOS (são volumes físicos)
     let volUnit;
-    if(formato==='circular'){
-      volUnit = areaBaseCircular(d1) * alt;
-    }else{
-      volUnit = areaBaseRetangular(d1, d2) * alt;
-    }
-
-    fixos.push({desc, formato, d1, d2: formato==='circular'?0:d2, alt, qtd, volUnit});
+    if(formato==='circular'){ volUnit=areaBaseCircular(d1)*alt; }
+    else{ volUnit=areaBaseRetangular(d1,d2)*alt; }
+    fixos.push({desc,formato,d1,d2:formato==='circular'?0:d2,alt,qtd,volUnit});
     renderTabelaFixos();
   });
 
   function renderTabelaFixos(){
-    const tb = document.querySelector('#tblFixos tbody');
-    tb.innerHTML = '';
-    fixos.forEach((f, i) => {
-      const baseTxt = f.formato==='circular'
-        ? `Ø ${fmt(f.d1)}`
-        : `${fmt(f.d1)} × ${fmt(f.d2)}`;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${i+1}</td>
-        <td>${escapeHTML(f.desc)}</td>
-        <td>${f.formato}</td>
-        <td>${baseTxt}</td>
-        <td>${fmt(f.alt)}</td>
-        <td>${f.qtd}</td>
-        <td>${fmt(f.volUnit)}</td>
-        <td>${fmt(f.volUnit * f.qtd)}</td>
-        <td><button class="btn danger" data-i="${i}">Remover</button></td>
-      `;
+    const tb=document.querySelector('#tblFixos tbody'); tb.innerHTML='';
+    fixos.forEach((f,i)=>{
+      const baseTxt = f.formato==='circular'? `Ø ${fmt(f.d1)}` : `${fmt(f.d1)} × ${fmt(f.d2)}`;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${i+1}</td><td>${escapeHTML(f.desc)}</td><td>${f.formato}</td>
+        <td>${baseTxt}</td><td>${fmt(f.alt)}</td><td>${f.qtd}</td>
+        <td>${fmt(f.volUnit)}</td><td>${fmt(f.volUnit*f.qtd)}</td>
+        <td><button class="btn danger" data-i="${i}">Remover</button></td>`;
       tb.appendChild(tr);
     });
-    tb.querySelectorAll('button[data-i]').forEach(btn=>{
-      btn.addEventListener('click', e=>{
-        const idx = parseInt(e.currentTarget.getAttribute('data-i'),10);
-        if(!isNaN(idx)){ fixos.splice(idx,1); renderTabelaFixos(); }
-      });
-    });
+    tb.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('click',e=>{
+      const idx=parseInt(e.currentTarget.getAttribute('data-i'),10); if(!isNaN(idx)){ fixos.splice(idx,1); renderTabelaFixos(); }
+    }));
   }
 
-  document.querySelector('#btnExemploFixos').addEventListener('click', ()=>{
-    // 5 prateleiras Ø60 × 2 cm
+  document.querySelector('#btnExemploFixos').addEventListener('click',()=>{
     fixos.push({desc:'Prateleira Ø60×2 cm', formato:'circular', d1:60, d2:0, alt:2, qtd:5, volUnit: areaBaseCircular(60)*2});
-    // 15 suportes Ø5 × 10 cm
     fixos.push({desc:'Suporte Ø5×10 cm', formato:'circular', d1:5, d2:0, alt:10, qtd:15, volUnit: areaBaseCircular(5)*10});
     renderTabelaFixos();
   });
-  document.querySelector('#btnLimparFixos').addEventListener('click', ()=>{ fixos.length=0; renderTabelaFixos(); });
+  document.querySelector('#btnLimparFixos').addEventListener('click',()=>{ fixos.length=0; renderTabelaFixos(); });
 
-  // ---------- Cálculo ----------
+  // ------------------ Cálculo + PDF ------------------
   document.querySelector('#btnCalcular').addEventListener('click', calcular);
   document.querySelector('#btnGerarPDF').addEventListener('click', gerarPDF);
   document.querySelector('#btnLimparTudo').addEventListener('click', ()=>{
-    pecas.length = 0; renderTabelaPecas();
-    fixos.length = 0; renderTabelaFixos();
-    $('#precoFornoCheio').value = '';
-    $('#tipoQueima').value = 'Biscoito';
+    pecas.length=0; renderTabelaPecas();
+    fixos.length=0; renderTabelaFixos();
+    $('#precoFornoCheio').value=''; $('#tipoQueima').value='Biscoito';
     ['volForno','volFixos','volUtil','volPecas','pctOcup','pctBadge','outQueima','outCheio','outPagar']
-      .forEach(id=>{ const el=$('#'+id); if(el) el.textContent = (id==='pctBadge'?'':'—'); });
-    ultimoResultado = null;
+      .forEach(id=>{ const el=$('#'+id); if(el) el.textContent=(id==='pctBadge'?'':'—'); });
+    ultimoResultado=null;
   });
 
   function calcular(){
-    const volForno = volumeForno();
-    const volFixos = fixos.reduce((s,f)=> s + f.volUnit * f.qtd, 0);
-    const volUtil  = Math.max(0, volForno - volFixos);
-    const volPecas = pecas.reduce((s,p)=> s + p.volUnit * p.qtd, 0);
+    const volForno=volumeForno();
+    const volFixos=fixos.reduce((s,f)=>s+f.volUnit*f.qtd,0);
+    const volUtil=Math.max(0, volForno - volFixos);
+    const volPecas=pecas.reduce((s,p)=>s+p.volUnit*p.qtd,0);
 
-    $('#volForno').textContent = fmt(volForno);
-    $('#volFixos').textContent = fmt(volFixos);
-    $('#volUtil').textContent  = fmt(volUtil);
-    $('#volPecas').textContent = fmt(volPecas);
+    $('#volForno').textContent=fmt(volForno);
+    $('#volFixos').textContent=fmt(volFixos);
+    $('#volUtil').textContent=fmt(volUtil);
+    $('#volPecas').textContent=fmt(volPecas);
 
-    let pct = volUtil>0 ? (volPecas / volUtil) * 100 : 0;
-    const precoCheio = parseFloat($('#precoFornoCheio').value||0);
-    const pagar = Math.max(0, (pct/100) * precoCheio);
+    const pct = volUtil>0 ? (volPecas/volUtil)*100 : 0;
+    const precoCheio=parseFloat($('#precoFornoCheio').value||0);
+    const pagar=Math.max(0,(pct/100)*precoCheio);
 
-    $('#pctOcup').textContent = pct ? (pct.toFixed(2)+'%') : '—';
-    const badge = $('#pctBadge');
-    badge.textContent = '';
-    badge.className = '';
-    if(pct>100){ badge.textContent = ' (excede 100%)'; badge.classList.add('bad'); }
-    else if(pct>85){ badge.textContent = ' (alto uso)'; badge.classList.add('warn'); }
-    else if(pct>0){ badge.textContent = ' (ok)'; badge.classList.add('ok'); }
+    $('#pctOcup').textContent=pct? (pct.toFixed(2)+'%'):'—';
+    const badge=$('#pctBadge'); badge.textContent=''; badge.className='';
+    if(pct>100){ badge.textContent=' (excede 100%)'; badge.classList.add('bad'); }
+    else if(pct>85){ badge.textContent=' (alto uso)'; badge.classList.add('warn'); }
+    else if(pct>0){ badge.textContent=' (ok)'; badge.classList.add('ok'); }
 
-    $('#outQueima').textContent = $('#tipoQueima').value;
-    $('#outCheio').textContent = precoCheio>0 ? 'R$ ' + money(precoCheio) : '—';
-    $('#outPagar').textContent = (precoCheio>0 && pct>0) ? 'R$ ' + money(pagar) : '—';
+    $('#outQueima').textContent=$('#tipoQueima').value;
+    $('#outCheio').textContent=precoCheio>0 ? 'R$ '+money(precoCheio):'—';
+    $('#outPagar').textContent=(precoCheio>0 && pct>0) ? 'R$ '+money(pagar):'—';
 
-    // Guardar tudo para o PDF + rateio por peça (sem volumes no PDF)
-    ultimoResultado = {
-      volUtil, volPecas, pct, precoCheio, pagar,
-      tipoQueima: $('#tipoQueima').value,
-      pecas: JSON.parse(JSON.stringify(pecas)),
-      fixos: JSON.parse(JSON.stringify(fixos)),
-      timestamp: new Date()
-    };
+    ultimoResultado={ volUtil, volPecas, pct, precoCheio, pagar, tipoQueima:$('#tipoQueima').value, pecas:JSON.parse(JSON.stringify(pecas)), timestamp:new Date() };
   }
 
-  // ---------- PDF: apenas itens com valores e total ----------
   async function gerarPDF(){
     try{
-      if(!window.jspdf || !window.jspdf.jsPDF){
-        alert('Biblioteca de PDF não carregou. Abrindo impressão como alternativa.');
-        window.print();
-        return;
-      }
+      if(!window.jspdf || !window.jspdf.jsPDF){ alert('Biblioteca de PDF não carregou. Use “Imprimir” > Salvar em PDF.'); window.print(); return; }
       if(!ultimoResultado){ calcular(); }
-      const r = ultimoResultado;
-      if(!r || !isFinite(r.pagar) || r.pagar<=0){
-        alert('Preencha o valor do forno cheio e adicione peças para gerar o PDF.');
-        return;
-      }
+      const r=ultimoResultado;
+      if(!r || !isFinite(r.pagar) || r.pagar<=0){ alert('Informe o valor do forno cheio e adicione peças.'); return; }
 
-      // Rateio do total entre as peças proporcional ao volume (com folgas)
-      const totalVol = Math.max(0, r.volPecas);
-      const totalR$  = r.pagar;
-      const linhas = [];
-      r.pecas.forEach((p,i)=>{
-        const volTotalPeca = p.volUnit * p.qtd;
-        const fraq = totalVol>0 ? (volTotalPeca / totalVol) : 0;
-        const valorTotal = fraq * totalR$;
-        const valorUnit  = p.qtd>0 ? (valorTotal / p.qtd) : 0;
-        linhas.push([
-          String(i+1),
-          p.desc,
-          String(p.qtd),
-          'R$ '+money(valorUnit),
-          'R$ '+money(valorTotal)
-        ]);
+      // Rateio proporcional por volume
+      const totalVol=r.volPecas; const totalR$=r.pagar;
+      const linhas = pecas.map((p,i)=>{
+        const volTot=p.volUnit*p.qtd; const fraq = totalVol>0 ? volTot/totalVol : 0;
+        const valorTotal = fraq*totalR$; const valorUnit = p.qtd>0 ? valorTotal/p.qtd : 0;
+        return [ String(i+1), p.desc, String(p.qtd), 'R$ '+money(valorUnit), 'R$ '+money(valorTotal) ];
       });
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({unit:'pt', format:'a4'});
       const pageW = doc.internal.pageSize.getWidth();
-
-      // Cabeçalho simples
       doc.setFont('helvetica','bold'); doc.setFontSize(16);
       doc.text('Relatório de Queima – Valores por Peça', pageW/2, 40, {align:'center'});
       doc.setFont('helvetica','normal'); doc.setFontSize(10);
       doc.text(`Gerado em: ${dataBR(r.timestamp)}`, pageW/2, 58, {align:'center'});
 
-      // Tabela apenas com valores em reais (sem volumes)
       doc.autoTable({
         startY: 80,
         head:[['#','Descrição','Qtd','Valor por peça (R$)','Valor do item (R$)']],
-        body: linhas.length ? linhas : [['–','(sem peças)','–','–','–']],
-        theme:'grid',
-        styles:{ fontSize:10, cellPadding:4 },
-        headStyles:{ fillColor:[30,41,59] }
+        body: linhas.length?linhas:[['–','(sem peças)','–','–','–']],
+        theme:'grid', styles:{fontSize:10, cellPadding:4}, headStyles:{fillColor:[30,41,59]}
       });
 
-      // Totais e info de queima
       let y = doc.lastAutoTable.finalY + 20;
-      doc.setFont('helvetica','bold'); doc.setFontSize(12);
-      doc.text('Resumo', 40, y);
-      y += 18;
+      doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Resumo', 40, y); y+=18;
       doc.setFont('helvetica','normal'); doc.setFontSize(11);
-      doc.text(`Tipo de queima: ${r.tipoQueima || '—'}`, 40, y); y += 16;
-      doc.text(`Valor total da queima: R$ ${money(totalR$)}`, 40, y); y += 20;
+      doc.text(`Tipo de queima: ${r.tipoQueima || '—'}`, 40, y); y+=16;
+      doc.text(`Valor total da queima: R$ ${money(totalR$)}`, 40, y);
 
-      // Rodapé simples
-      const footY = doc.internal.pageSize.getHeight() - 30;
-      doc.setFontSize(9);
-      doc.text('Documento para apresentação ao cliente – valores proporcionais de ocupação.', pageW/2, footY, {align:'center'});
+      const nome=`relatorio-pecas-${dataNome(r.timestamp)}.pdf`; doc.save(nome);
+    }catch(e){ console.error(e); alert('Falha ao gerar PDF. Use “Imprimir” > Salvar como PDF.'); window.print(); }
+  }
 
-      // Salvar
-      const nome = `relatorio-pecas-${dataNome(r.timestamp)}.pdf`;
-      doc.save(nome);
+  // ------------------ Firebase: salvar/carregar ------------------
+  async function salvarPreferencias(){
+    if(!currentUser) return alert('Faça login primeiro.');
+    const formato=$('#fornoFormato').value;
+    let defaultKiln={formato};
+    if(formato==='circular'){ defaultKiln.diam=num($('#fornoDiam').value); defaultKiln.alt=num($('#fornoAlt').value); }
+    else if(formato==='retangular'){ defaultKiln.larg=num($('#fornoLarg').value); defaultKiln.prof=num($('#fornoProf').value); defaultKiln.alt=num($('#fornoAlt').value); }
+    else { defaultKiln.n=parseInt($('#fornoNLados').value||0,10); defaultKiln.diam=num($('#fornoDiam').value); defaultKiln.alt=num($('#fornoAlt').value); }
+    const precoFornoCheio=num($('#precoFornoCheio').value); const tipoQueimaPadrao=$('#tipoQueima').value;
+    await setDoc(doc(db,'users',currentUser.uid), { defaultKiln, precoFornoCheio, tipoQueimaPadrao }, { merge:true });
+    alert('Preferências salvas.');
+  }
 
-    }catch(err){
-      console.error(err);
-      alert('Não foi possível gerar o PDF agora. Como alternativa, use “Imprimir” e salve como PDF.');
-      window.print();
+  async function carregarPreferencias(){
+    if(!currentUser) return;
+    const snap=await getDoc(doc(db,'users',currentUser.uid)); if(!snap.exists()) return;
+    const d=snap.data();
+    if(d.defaultKiln){
+      $('#fornoFormato').value=d.defaultKiln.formato||'circular'; renderFornoCampos();
+      if(d.defaultKiln.formato==='circular'){ $('#fornoDiam').value=d.defaultKiln.diam??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
+      else if(d.defaultKiln.formato==='retangular'){ $('#fornoLarg').value=d.defaultKiln.larg??''; $('#fornoProf').value=d.defaultKiln.prof??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
+      else { $('#fornoNLados').value=d.defaultKiln.n??''; $('#fornoDiam').value=d.defaultKiln.diam??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
     }
+    if(typeof d.precoFornoCheio==='number') $('#precoFornoCheio').value=d.precoFornoCheio;
+    if(d.tipoQueimaPadrao) $('#tipoQueima').value=d.tipoQueimaPadrao;
   }
 
-  // ---------- Helpers ----------
-  function fmt(x){
-    if(!isFinite(x) || x===0) return '0';
-    return Number(x).toFixed(2);
+  async function salvarQueima(){
+    if(!currentUser) return alert('Faça login primeiro.');
+    if(typeof calcular==='function') calcular();
+    if(!ultimoResultado || !isFinite(ultimoResultado.pagar) || ultimoResultado.pagar<=0){ return alert('Calcule primeiro (com valor do forno cheio).'); }
+    const job={
+      createdAt: serverTimestamp(),
+      tipoQueima: $('#tipoQueima').value,
+      precoFornoCheio: num($('#precoFornoCheio').value),
+      resumo:{ valorTotal: Number(ultimoResultado.pagar||0) },
+      fornoSnapshot: snapshotForno(),
+      fixos: fixos.map(sanitItem),
+      pecas: pecas.map(sanitItem)
+    };
+    const ref = await addDoc(collection(db,'users',currentUser.uid,'queimas'), job);
+    alert('Queima salva. ID: '+ref.id);
   }
-  function money(x){
-    return Number(x).toFixed(2).replace('.',',');
+
+  function sanitItem(x){ return { desc:x.desc, formato:x.formato, d1:x.d1, d2:x.d2, alt:x.alt, qtd:x.qtd }; }
+  function snapshotForno(){
+    const formato=$('#fornoFormato').value;
+    if(formato==='circular'){ return {formato, diam:num($('#fornoDiam').value), alt:num($('#fornoAlt').value)}; }
+    if(formato==='retangular'){ return {formato, larg:num($('#fornoLarg').value), prof:num($('#fornoProf').value), alt:num($('#fornoAlt').value)}; }
+    return {formato, n:parseInt($('#fornoNLados').value||0,10), diam:num($('#fornoDiam').value), alt:num($('#fornoAlt').value)};
   }
-  function escapeHTML(s){
-    return s.replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[c]));
-  }
-  function dataBR(d){
-    const z=n=>String(n).padStart(2,'0');
-    const dt = d instanceof Date ? d : new Date(d);
-    return `${z(dt.getDate())}/${z(dt.getMonth()+1)}/${dt.getFullYear()} ${z(dt.getHours())}:${z(dt.getMinutes())}`;
-  }
-  function dataNome(d){
-    const z=n=>String(n).padStart(2,'0');
-    const dt = d instanceof Date ? d : new Date(d);
-    return `${dt.getFullYear()}-${z(dt.getMonth()+1)}-${z(dt.getDate())}-${z(dt.getHours())}${z(dt.getMinutes())}`;
-  }
+  function num(v){ const n=parseFloat(v||0); return isFinite(n)?n:0; }
+
+  // Ganchos UI Firebase
+  $('#btnSavePrefs').addEventListener('click', salvarPreferencias);
+  $('#btnLoadPrefs').addEventListener('click', carregarPreferencias);
+  $('#btnSaveJob').addEventListener('click', salvarQueima);
+
+  // ------------------ Helpers ------------------
+  function fmt(x){ if(!isFinite(x)||x===0) return '0'; return Number(x).toFixed(2); }
+  function money(x){ return Number(x).toFixed(2).replace('.',','); }
+  function escapeHTML(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function dataBR(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${z(dt.getDate())}/${z(dt.getMonth()+1)}/${dt.getFullYear()} ${z(dt.getHours())}:${z(dt.getMinutes())}`; }
+  function dataNome(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${dt.getFullYear()}-${z(dt.getMonth()+1)}-${z(dt.getDate())}-${z(dt.getHours())}${z(dt.getMinutes())}`; }
 </script>
 </body>
 </html>
-
