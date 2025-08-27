@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="manifest" href="manifest.json">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calculadora de Ocupação do Forno – com Firebase</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f1115">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192">
 <link rel="icon" href="icons/icon-512.png" sizes="512x512">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Calculadora de Ocupação do Forno – com Firebase</title>
 
-<!-- jsPDF + AutoTable para gerar o PDF simplificado -->
+<!-- PDF -->
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
@@ -76,7 +78,6 @@
         </select>
       </label>
       <div id="fornoCampos" class="row" style="margin-top:6px"></div>
-      <p class="muted" id="fornoAjuda" style="margin-top:8px"></p>
     </section>
 
     <!-- Preço e cálculo -->
@@ -152,7 +153,7 @@
       </table>
     </section>
 
-    <!-- Ocupações fixas (mobílias) -->
+    <!-- Ocupações fixas -->
     <section class="card" style="grid-column:1 / -1">
       <h3>4) Ocupações Fixas do Forno (mobílias)</h3>
       <p class="muted">Use para prateleiras e suportes. Esses volumes são subtraídos do volume total do forno.</p>
@@ -213,7 +214,7 @@
       </div>
     </section>
 
-    <!-- Resultado (apenas conferência; PDF não mostra volumes) -->
+    <!-- Resultado -->
     <section class="card" style="grid-column:1 / -1">
       <h3>5) Resultado</h3>
       <div class="result">
@@ -235,6 +236,7 @@
         <button id="btnLoadPrefs" class="btn">Carregar preferências</button>
         <button id="btnSavePrefs" class="btn">Salvar preferências</button>
         <button id="btnSaveJob" class="btn primary">Salvar QUEIMA (histórico)</button>
+        <button id="btnHist" class="btn">Gerar PDF Histórico</button>
       </div>
     </section>
   </div>
@@ -242,10 +244,9 @@
 
 <!-- Firebase (modular v10+) -->
 <script type="module">
-  // ------------------ Firebase SDK ------------------
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
   // === SEU CONFIG ===
   const firebaseConfig = {
@@ -257,7 +258,6 @@
     appId: "1:603189447452:web:b80ceacbe358cffc0d48d9",
     measurementId: "G-VTY7WVGK3T"
   };
-
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
@@ -267,21 +267,23 @@
   const $ = s => document.querySelector(s);
   let currentUser = null;
 
-  // Login/Logout com alinhamento e toggle de botões
+  // Login/Logout com toggle e fallback redirect
   const btnLogin = $('#btnLogin');
   const btnLogout = $('#btnLogout');
   function updateAuthButtons(user){
-    if(user){
-      btnLogin.style.display = 'none';
-      btnLogout.style.display = 'inline-flex';
-    }else{
-      btnLogin.style.display = 'inline-flex';
-      btnLogout.style.display = 'none';
-    }
+    btnLogin.style.display = user ? 'none' : 'inline-flex';
+    btnLogout.style.display = user ? 'inline-flex' : 'none';
   }
   btnLogin.addEventListener('click', async ()=> {
-    try { await signInWithPopup(auth, provider); }
-    catch(e){ alert('Falha no login: ' + e.message); }
+    try {
+      await signInWithPopup(auth, provider);
+    } catch(e) {
+      if (String(e.code || e.message).includes('popup')) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        alert('Falha no login: ' + e.message);
+      }
+    }
   });
   btnLogout.addEventListener('click', async ()=> { await signOut(auth); });
 
@@ -308,7 +310,6 @@
   // ------------------ Forno (UI dinâmica) ------------------
   const fornoFormato = $('#fornoFormato');
   const fornoCampos  = $('#fornoCampos');
-  const fornoAjuda   = $('#fornoAjuda');
 
   function renderFornoCampos(){
     const fmt = fornoFormato.value;
@@ -320,7 +321,6 @@
         <div style="grid-column:span 6">
           <label>Altura interna (cm)<input type="number" id="fornoAlt" value="70" step="0.1" min="0"/></label>
         </div>`;
-      fornoAjuda.textContent='Volume = π·(d/2)²·altura.';
     }else if(fmt==='retangular'){
       fornoCampos.innerHTML = `
         <div style="grid-column:span 4">
@@ -332,7 +332,6 @@
         <div style="grid-column:span 4">
           <label>Altura (cm)<input type="number" id="fornoAlt" step="0.1" min="0"/></label>
         </div>`;
-      fornoAjuda.textContent='Volume = largura·profundidade·altura.';
     }else{
       fornoCampos.innerHTML = `
         <div style="grid-column:span 4">
@@ -344,7 +343,6 @@
         <div style="grid-column:span 4">
           <label>Altura (cm)<input type="number" id="fornoAlt" value="70" step="0.1" min="0"/></label>
         </div>`;
-      fornoAjuda.textContent='Área da base = (n/2)·R²·sen(2π/n); Volume = área·altura.';
     }
   }
   fornoFormato.addEventListener('change', renderFornoCampos);
@@ -379,7 +377,7 @@
     const d2=parseFloat($('#pecaDim2').value||0);
     const alt=parseFloat($('#pecaAlt').value||0);
     const qtd=parseInt($('#pecaQtd').value||0,10);
-    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){ alert('Preencha descrição, dimensões válidas, altura e quantidade.'); return; }
+    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){ alert('Preencha descrição, dimensões, altura e quantidade.'); return; }
 
     // FOLGAS automáticas
     const altEfetiva = alt + FOLGA_VERTICAL;
@@ -413,7 +411,7 @@
     }));
   }
 
-  // ------------------ Fixos (mobílias) ------------------
+  // ------------------ Fixos ------------------
   const fixoFormato=$('#fixoFormato'), labFixo1=$('#labFixo1'), labFixo2=$('#labFixo2');
   function syncFixoLabels(){
     if(fixoFormato.value==='circular'){ labFixo1.firstChild.textContent='Diâmetro (cm)'; labFixo2.firstChild.textContent='— (ignorado)'; }
@@ -428,7 +426,7 @@
     const d2=parseFloat($('#fixoDim2').value||0);
     const alt=parseFloat($('#fixoAlt').value||0);
     const qtd=parseInt($('#fixoQtd').value||0,10);
-    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){ alert('Preencha descrição, dimensões válidas, altura e quantidade.'); return; }
+    if(!desc || d1<=0 || alt<=0 || qtd<=0 || (formato==='retangular' && d2<=0)){ alert('Preencha descrição, dimensões, altura e quantidade.'); return; }
 
     let volUnit;
     if(formato==='circular'){ volUnit=areaBaseCircular(d1)*alt; }
@@ -461,7 +459,7 @@
   });
   document.querySelector('#btnLimparFixos').addEventListener('click',()=>{ fixos.length=0; renderTabelaFixos(); });
 
-  // ------------------ Cálculo + PDF ------------------
+  // ------------------ Cálculo + PDF cliente ------------------
   document.querySelector('#btnCalcular').addEventListener('click', calcular);
   document.querySelector('#btnGerarPDF').addEventListener('click', gerarPDF);
   document.querySelector('#btnLimparTudo').addEventListener('click', ()=>{
@@ -542,23 +540,15 @@
   }
 
   // ------------------ Firebase: salvar/carregar PREFERÊNCIAS ------------------
-  // Agora SÓ salva: tipo + dimensões do forno, e a lista de FIXOS (mobílias).
   async function salvarPreferencias(){
     if(!currentUser) return alert('Faça login primeiro.');
-
     const formato=$('#fornoFormato').value;
     let defaultKiln={formato};
     if(formato==='circular'){ defaultKiln.diam=num($('#fornoDiam').value); defaultKiln.alt=num($('#fornoAlt').value); }
     else if(formato==='retangular'){ defaultKiln.larg=num($('#fornoLarg').value); defaultKiln.prof=num($('#fornoProf').value); defaultKiln.alt=num($('#fornoAlt').value); }
     else { defaultKiln.n=parseInt($('#fornoNLados').value||0,10); defaultKiln.diam=num($('#fornoDiam').value); defaultKiln.alt=num($('#fornoAlt').value); }
-
     const defaultFixos = fixos.map(f=>({desc:f.desc, formato:f.formato, d1:f.d1, d2:f.d2, alt:f.alt, qtd:f.qtd}));
-
-    await setDoc(doc(db,'users',currentUser.uid), {
-      defaultKiln,
-      defaultFixos
-    }, { merge:true });
-
+    await setDoc(doc(db,'users',currentUser.uid), { defaultKiln, defaultFixos }, { merge:true });
     alert('Preferências salvas (forno + mobílias).');
   }
 
@@ -566,16 +556,12 @@
     if(!currentUser) return;
     const snap=await getDoc(doc(db,'users',currentUser.uid)); if(!snap.exists()) return;
     const d=snap.data();
-
-    // Forno
     if(d.defaultKiln){
       $('#fornoFormato').value=d.defaultKiln.formato||'circular'; renderFornoCampos();
       if(d.defaultKiln.formato==='circular'){ $('#fornoDiam').value=d.defaultKiln.diam??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
       else if(d.defaultKiln.formato==='retangular'){ $('#fornoLarg').value=d.defaultKiln.larg??''; $('#fornoProf').value=d.defaultKiln.prof??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
       else { $('#fornoNLados').value=d.defaultKiln.n??''; $('#fornoDiam').value=d.defaultKiln.diam??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
     }
-
-    // Mobílias (fixos)
     if(Array.isArray(d.defaultFixos)){
       fixos.length = 0;
       d.defaultFixos.forEach(f=>{
@@ -586,7 +572,7 @@
     }
   }
 
-  // ------------------ Firebase: salvar uma QUEIMA (histórico) ------------------
+  // ------------------ Firebase: salvar QUEIMA ------------------
   async function salvarQueima(){
     if(!currentUser) return alert('Faça login primeiro.');
     if(typeof calcular==='function') calcular();
@@ -595,7 +581,11 @@
       createdAt: serverTimestamp(),
       tipoQueima: $('#tipoQueima').value,
       precoFornoCheio: num($('#precoFornoCheio').value),
-      resumo:{ valorTotal: Number(ultimoResultado.pagar||0) },
+      resumo:{
+        valorTotal: Number(ultimoResultado.pagar||0),
+        pct: Number(ultimoResultado.pct||0),
+        pecasCount: pecas.reduce((s,p)=>s+(p.qtd||0),0)
+      },
       fornoSnapshot: snapshotForno(),
       fixos: fixos.map(sanitItem),
       pecas: pecas.map(sanitItem)
@@ -604,10 +594,44 @@
     alert('Queima salva. ID: '+ref.id);
   }
 
+  // ------------------ Firebase: PDF HISTÓRICO ------------------
+  async function gerarHistPDF(){
+    if(!currentUser) return alert("Faça login primeiro.");
+    const col = collection(db,'users',currentUser.uid,'queimas');
+    const snap = await getDocs(col);
+
+    const rows=[]; let i=1;
+    snap.forEach(docu=>{
+      const q=docu.data();
+      const dt = q.createdAt?.toDate ? q.createdAt.toDate() : null;
+      const dataTxt = dt ? dataBR(dt) : '—';
+      const valor = q.resumo?.valorTotal ?? 0;
+      const tipo  = q.tipoQueima || '—';
+      const qtdPecas = q.resumo?.pecasCount ?? (Array.isArray(q.pecas)? q.pecas.reduce((s,p)=>s+(p.qtd||0),0) : 0);
+      rows.push([String(i++), dataTxt, tipo, String(qtdPecas), 'R$ '+money(valor)]);
+    });
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({unit:'pt', format:'a4'});
+    const pageW = doc.internal.pageSize.getWidth();
+    doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('Histórico de Queimas', pageW/2, 40, {align:'center'});
+
+    doc.autoTable({
+      startY: 70,
+      head:[['#','Data','Tipo','Qtd Peças','Valor (R$)']],
+      body: rows.length?rows:[['–','—','—','—','—']],
+      theme:'grid', styles:{fontSize:10, cellPadding:4}, headStyles:{fillColor:[30,41,59]}
+    });
+
+    doc.save('historico-queimas.pdf');
+  }
+
   // Ganchos UI Firebase
   $('#btnSavePrefs').addEventListener('click', salvarPreferencias);
   $('#btnLoadPrefs').addEventListener('click', carregarPreferencias);
   $('#btnSaveJob').addEventListener('click', salvarQueima);
+  $('#btnHist').addEventListener('click', gerarHistPDF);
 
   // ------------------ Helpers ------------------
   function sanitItem(x){ return { desc:x.desc, formato:x.formato, d1:x.d1, d2:x.d2, alt:x.alt, qtd:x.qtd }; }
@@ -624,13 +648,14 @@
   function dataBR(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${z(dt.getDate())}/${z(dt.getMonth()+1)}/${dt.getFullYear()} ${z(dt.getHours())}:${z(dt.getMinutes())}`; }
   function dataNome(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${dt.getFullYear()}-${z(dt.getMonth()+1)}-${z(dt.getDate())}-${z(dt.getHours())}${z(dt.getMinutes())}`; }
 </script>
-  <script>
+
+<!-- PWA: registrar SW -->
+<script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      // Caminho relativo funciona no GitHub Pages (repo raiz ou /nome-do-repo/)
       navigator.serviceWorker.register('./service-worker.js').catch(console.error);
     });
   }
-  </script>
+</script>
 </body>
 </html>
