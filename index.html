@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1115">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Calculadora de Ocupação do Forno – com Firebase</title>
@@ -617,5 +624,13 @@
   function dataBR(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${z(dt.getDate())}/${z(dt.getMonth()+1)}/${dt.getFullYear()} ${z(dt.getHours())}:${z(dt.getMinutes())}`; }
   function dataNome(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${dt.getFullYear()}-${z(dt.getMonth()+1)}-${z(dt.getDate())}-${z(dt.getHours())}${z(dt.getMinutes())}`; }
 </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // Caminho relativo funciona no GitHub Pages (repo raiz ou /nome-do-repo/)
+      navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+    });
+  }
+  </script>
 </body>
 </html>
