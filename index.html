@@ -383,11 +383,11 @@
     const altEfetiva = alt + FOLGA_VERTICAL;
     let volUnit;
     if(formato==='circular'){
-      const dEf = d1 + 2*FOLGA_LATERAL;
+      const dEf = d1 + 5*FOLGA_LATERAL;
       volUnit = areaBaseCircular(dEf)*altEfetiva;
     }else{
-      const L = d1 + 2*FOLGA_LATERAL;
-      const P = d2 + 2*FOLGA_LATERAL;
+      const L = d1 + 5*FOLGA_LATERAL;
+      const P = d2 + 5*FOLGA_LATERAL;
       volUnit = areaBaseRetangular(L,P)*altEfetiva;
     }
     pecas.push({desc, formato, d1, d2: formato==='circular'?0:d2, alt, qtd, volUnit});
