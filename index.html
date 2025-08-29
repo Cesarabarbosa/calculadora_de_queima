@@ -22,39 +22,39 @@
   :root{
     --bg:#ffffff; --ink:#1e3a8a; --muted:#3b82f6; --line:#e5e7eb;
     --input:#f3f4f6; --btn:#1e40af; --btnText:#fff; --accent:#2563eb;
-    --danger:#b91c1c; --ok:#16a34a; --warn:#ca8a04;
+    --danger:#b91c1c;
   }
   *{box-sizing:border-box}
-  body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink);}
-  header{padding:12px 16px; background:#f8fafc; border-bottom:1px solid var(--line)}
-  .topbar{max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:12px}
-  .brand{font-size:20px; font-weight:800; color:var(--accent)}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{padding:12px 16px;background:#f8fafc;border-bottom:1px solid var(--line)}
+  .topbar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .brand{font-size:20px;font-weight:800;color:var(--accent)}
   .spacer{flex:1}
-  .auth{display:flex; align-items:center; gap:8px}
-  .who{min-width:150px; text-align:right; color:#0f172a}
-  main{max-width:1100px; margin:0 auto; padding:16px}
-  .grid{display:grid; gap:12px}
+  .auth{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .who{min-width:150px;text-align:right;color:#0f172a}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid #1e40af;border-radius:10px;background:var(--btn);color:var(--btnText);cursor:pointer;font-weight:600}
+  .btn.secondary{background:#fff;color:var(--btn);border-color:var(--btn)}
+  .btn.ghost{background:transparent;color:var(--btn);border-color:transparent}
+  .btn.danger{background:var(--danger);border-color:var(--danger)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  main{max-width:1100px;margin:0 auto;padding:16px}
+  .grid{display:grid;gap:12px}
   @media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
-  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px}
-  h3{margin:0 0 10px 0; font-size:18px; color:var(--accent)}
-  label{display:block; font-size:13px; color:var(--ink); margin-top:8px}
-  input,select{width:100%; background:var(--input); color:#0f172a; border:1px solid var(--line); border-radius:10px; padding:10px; margin-top:4px; outline:none}
-  input:focus,select:focus{border-color:#bfdbfe; box-shadow:0 0 0 3px #dbeafe}
-  .row{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+  h3{margin:0 0 10px 0;font-size:18px;color:var(--accent)}
+  label{display:block;font-size:13px;color:var(--ink);margin-top:8px}
+  input,select{width:100%;background:var(--input);color:#0f172a;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:4px;outline:none}
+  input:focus,select:focus{border-color:#bfdbfe;box-shadow:0 0 0 3px #dbeafe}
+  .row{display:grid;grid-template-columns:repeat(12,1fr);gap:8px}
   .row>*{grid-column:span 12}
-  .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border:1px solid #1e40af; border-radius:10px; background:var(--btn); color:var(--btnText); cursor:pointer; font-weight:600}
-  .btn.secondary{background:#fff; color:var(--btn); border-color:var(--btn)}
-  .btn.ghost{background:transparent; color:var(--btn); border-color:transparent}
-  .btn.danger{background:var(--danger); border-color:var(--danger)}
-  .btn:disabled{opacity:.5; cursor:not-allowed}
-  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; color:#0f172a}
-  th,td{border-bottom:1px solid var(--line); padding:8px; text-align:center}
-  th{background:#f1f5f9; color:#0f172a; font-weight:700}
-  .stat{background:#f8fafc; border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:8px}
-  .progress{height:16px; background:#e5e7eb; border-radius:999px; overflow:hidden}
-  .progress > div{height:100%; background:linear-gradient(90deg, #60a5fa, #2563eb); width:0%}
-  .help{font-size:12px; color:#334155; margin-top:4px}
-  .footer-actions{grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;color:#0f172a}
+  th,td{border-bottom:1px solid var(--line);padding:8px;text-align:center}
+  th{background:#f1f5f9;color:#0f172a;font-weight:700}
+  .stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+  .progress{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+  .progress>div{height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb);width:0%}
+  .help{font-size:12px;color:#334155;margin-top:4px}
+  .footer-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -62,10 +62,26 @@
   <div class="topbar">
     <div class="brand">Calculadora de Queima</div>
     <div class="spacer"></div>
+
+    <!-- Auth (Google + toggle Email) -->
     <div class="auth">
       <div class="who">Usuário: <span id="who">—</span></div>
       <button id="btnLogin" class="btn" style="display:none">Entrar com Google</button>
+      <button id="toggleEmailBox" class="btn secondary">Usar e-mail/senha</button>
       <button id="btnLogout" class="btn secondary" style="display:none">Sair</button>
+
+      <!-- Painel e-mail/senha -->
+      <div id="emailBox" style="display:none;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:10px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input id="emailName"  type="text"  placeholder="Nome (opcional p/ cadastro)" style="min-width:180px">
+          <input id="emailInput" type="email" placeholder="email@exemplo.com" required style="min-width:200px">
+          <input id="passInput"  type="password" placeholder="Senha (mín. 6)" required style="min-width:150px">
+          <button id="btnEmailLogin"  class="btn">Entrar</button>
+          <button id="btnEmailSignup" class="btn secondary">Criar conta</button>
+          <button id="btnEmailReset"  class="btn ghost" type="button">Esqueci a senha</button>
+        </div>
+        <div class="help" style="margin-top:6px">“Criar conta” usa o e-mail e senha informados; o campo Nome é opcional.</div>
+      </div>
     </div>
   </div>
 </header>
@@ -84,21 +100,21 @@
       </label>
       <div id="fornoCampos" class="row" style="margin-top:6px"></div>
 
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
         <button class="btn secondary" id="btnLoadPrefs">Baixar dados gravados (Firebase)</button>
         <button class="btn" id="btnSavePrefs">Salvar dados do forno/mobílias</button>
       </div>
     </section>
 
-    <!-- 2) Mobílias (prateleiras e suportes) -->
+    <!-- 2) Mobílias -->
     <section class="card">
       <h3>2) Mobílias do Forno</h3>
-      <p class="help">Informe as prateleiras e os suportes (isso será descontado do volume útil).</p>
+      <p class="help">Informe prateleiras e suportes (descontados do volume útil).</p>
 
       <div class="row">
         <div style="grid-column:span 4">
           <label>Descrição
-            <input type="text" id="fixoDesc" placeholder="Ex.: Prateleira Ø60 × 2 cm" />
+            <input type="text" id="fixoDesc" placeholder="Ex.: Prateleira Ø60 × 2 cm">
           </label>
         </div>
         <div style="grid-column:span 3">
@@ -111,25 +127,25 @@
         </div>
         <div style="grid-column:span 2">
           <label id="labFixo1">Diâmetro / Largura (cm)
-            <input type="number" id="fixoDim1" min="0" step="0.1" />
+            <input type="number" id="fixoDim1" min="0" step="0.1">
           </label>
         </div>
         <div style="grid-column:span 2">
           <label id="labFixo2">Profundidade (cm)
-            <input type="number" id="fixoDim2" min="0" step="0.1" />
+            <input type="number" id="fixoDim2" min="0" step="0.1">
           </label>
         </div>
         <div style="grid-column:span 1">
           <label>Altura (cm)
-            <input type="number" id="fixoAlt" min="0" step="0.1" />
+            <input type="number" id="fixoAlt" min="0" step="0.1">
           </label>
         </div>
         <div style="grid-column:span 1">
           <label>Qtd
-            <input type="number" id="fixoQtd" min="1" step="1" value="1" />
+            <input type="number" id="fixoQtd" min="1" step="1" value="1">
           </label>
         </div>
-        <div style="grid-column:span 2; align-self:end">
+        <div style="grid-column:span 2;align-self:end">
           <button class="btn" id="btnAddFixo">Adicionar mobília</button>
         </div>
       </div>
@@ -147,7 +163,7 @@
     </section>
 
     <!-- 3) Peças -->
-    <section class="card" style="grid-column:1 / -1">
+    <section class="card" style="grid-column:1/-1">
       <h3>3) Peças</h3>
       <div class="row">
         <div style="grid-column:span 3">
@@ -160,31 +176,31 @@
         </div>
         <div style="grid-column:span 3">
           <label>Descrição
-            <input type="text" id="pecaDesc" placeholder="Ex.: Caneca 300 ml" />
+            <input type="text" id="pecaDesc" placeholder="Ex.: Caneca 300 ml">
           </label>
         </div>
         <div style="grid-column:span 2">
           <label id="labDim1">Largura (cm)
-            <input type="number" id="pecaDim1" min="0" step="0.1" />
+            <input type="number" id="pecaDim1" min="0" step="0.1">
           </label>
         </div>
         <div style="grid-column:span 2">
           <label id="labDim2">Profundidade (cm)
-            <input type="number" id="pecaDim2" min="0" step="0.1" />
+            <input type="number" id="pecaDim2" min="0" step="0.1">
           </label>
-          <div class="help" id="hintRound" style="display:none">Se sua peça for <b>redonda</b>, repita o valor da largura aqui.</div>
+          <div class="help" id="hintRound" style="display:none">Se a peça for <b>redonda</b>, repita o valor da largura.</div>
         </div>
         <div style="grid-column:span 2">
           <label>Altura (cm)
-            <input type="number" id="pecaAlt" min="0" step="0.1" />
+            <input type="number" id="pecaAlt" min="0" step="0.1">
           </label>
         </div>
         <div style="grid-column:span 2">
           <label>Quantidade
-            <input type="number" id="pecaQtd" min="1" step="1" value="1" />
+            <input type="number" id="pecaQtd" min="1" step="1" value="1">
           </label>
         </div>
-        <div style="grid-column:span 2; align-self:end">
+        <div style="grid-column:span 2;align-self:end">
           <button class="btn" id="btnAddPeca">Adicionar peça</button>
         </div>
       </div>
@@ -201,7 +217,7 @@
       </table>
     </section>
 
-    <!-- 4) Preço / Queima -->
+    <!-- 4) Preço -->
     <section class="card">
       <h3>4) Preço / Queima</h3>
       <label>Tipo de queima
@@ -211,41 +227,41 @@
         </select>
       </label>
       <label>Valor do forno cheio (R$)
-        <input type="number" id="precoFornoCheio" min="0" step="0.01" placeholder="Ex.: 200 ou 400" />
+        <input type="number" id="precoFornoCheio" min="0" step="0.01" placeholder="Ex.: 200 ou 400">
       </label>
-      <p class="help">O valor proporcional das peças é calculado com base no volume útil do forno (após descontar mobílias) e com <b>folga de 2 cm</b> em volta e na altura de cada peça.</p>
+      <p class="help">Usamos volume útil (após mobílias) e uma <b>folga de 2 cm</b> em volta e na altura das peças.</p>
     </section>
 
-    <!-- 5) Resultado + gráfico -->
+    <!-- 5) Resultado -->
     <section class="card">
       <h3>5) Resultado</h3>
       <div class="stat">Volume do forno (bruto): <b id="volForno">—</b> cm³</div>
-      <div class="stat">Volume ocupado por mobílias: <b id="volFixos">—</b> cm³</div>
+      <div class="stat">Volume das mobílias: <b id="volFixos">—</b> cm³</div>
       <div class="stat">Volume útil do forno: <b id="volUtil">—</b> cm³</div>
       <div class="stat">Volume total das peças: <b id="volPecas">—</b> cm³</div>
       <div class="stat">Ocupação: <b id="pctOcup">—</b></div>
-      <div class="progress" aria-label="ocupação do forno"><div id="barOcup"></div></div>
+      <div class="progress" aria-label="ocupação"><div id="barOcup"></div></div>
       <div class="stat">Valor do forno cheio: <b id="outCheio">—</b></div>
       <div class="stat">Tipo de queima: <b id="outQueima">—</b></div>
       <div class="stat">Valor proporcional a pagar: <b id="outPagar">—</b></div>
     </section>
 
     <!-- 6) Histórico -->
-    <section class="card" style="grid-column:1 / -1">
+    <section class="card" style="grid-column:1/-1">
       <h3>6) Histórico</h3>
       <div class="row">
         <div style="grid-column:span 6">
-          <label>Pesquisar queimas (opcional – termo livre)
-            <input type="text" id="histQuery" placeholder="Ex.: Biscoito, Esmalte, 2025-08-28 etc." />
+          <label>Pesquisar queimas (termo livre)
+            <input type="text" id="histQuery" placeholder="Ex.: Biscoito, Esmalte, 2025-08-28">
           </label>
         </div>
-        <div style="grid-column:span 6; align-self:end">
+        <div style="grid-column:span 6;align-self:end">
           <button class="btn secondary" id="btnHist">Gerar PDF do Histórico</button>
         </div>
       </div>
     </section>
 
-    <!-- 7) Ações finais (tudo aqui embaixo) -->
+    <!-- 7) Botões finais (rodapé) -->
     <div class="footer-actions">
       <button class="btn" id="btnCalcular">Calcular</button>
       <button class="btn secondary" id="btnGerarPDF" disabled>Gerar PDF (salva a queima)</button>
@@ -259,8 +275,16 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+  import {
+    getAuth, onAuthStateChanged, GoogleAuthProvider,
+    signInWithPopup, signInWithRedirect, signOut,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    sendPasswordResetEmail, updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDoc, collection,
+    addDoc, getDocs, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
   // --- CONFIG ---
   const firebaseConfig = {
@@ -276,60 +300,101 @@
   const db   = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // DOM helpers
+  // Helpers
   const $ = s => document.querySelector(s);
   let currentUser=null, cargaEncerrada=false, ultimoResultado=null;
+  const FOLGA=2, FOLGA_ALT=2;
+  const money = x => Number(x).toFixed(2).replace('.',',');
+  const fmt   = x => (!isFinite(x)||x===0)?'0':Number(x).toFixed(2);
+  const escapeHTML = s => s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const dataBR = d => {const z=n=>String(n).padStart(2,'0');const t=d instanceof Date?d:new Date(d);return `${z(t.getDate())}/${z(t.getMonth()+1)}/${t.getFullYear()} ${z(t.getHours())}:${z(t.getMinutes())}`;}
+  const dataNome = d => {const z=n=>String(n).padStart(2,'0');const t=d instanceof Date?d:new Date(d);return `${t.getFullYear()}-${z(t.getMonth()+1)}-${z(t.getDate())}-${z(t.getHours())}${z(t.getMinutes())}`;}
 
-  // Auth UI
+  // --- Auth (Google + Email/Senha) ---
   const btnLogin=$('#btnLogin'), btnLogout=$('#btnLogout');
+  const toggleEmailBox=$('#toggleEmailBox'), emailBox=$('#emailBox');
+  const emailName=$('#emailName'), emailInput=$('#emailInput'), passInput=$('#passInput');
+  const btnEmailLogin=$('#btnEmailLogin'), btnEmailSignup=$('#btnEmailSignup'), btnEmailReset=$('#btnEmailReset');
+
   function updateAuthButtons(u){
     btnLogin.style.display = u ? 'none':'inline-flex';
     btnLogout.style.display= u ? 'inline-flex':'none';
   }
   btnLogin.addEventListener('click', async ()=>{
     try{ await signInWithPopup(auth, provider); }
-    catch(e){
-      if(String(e.code||e.message).includes('popup')) await signInWithRedirect(auth,provider);
-      else alert('Falha no login: '+e.message);
-    }
+    catch(e){ if(String(e.code||e.message).includes('popup')) await signInWithRedirect(auth,provider); else alert('Falha no login: '+e.message); }
   });
   btnLogout.addEventListener('click', async ()=>{ await signOut(auth); });
 
-  onAuthStateChanged(auth, async (u)=>{
-    currentUser = u||null;
-    $('#who').textContent = u ? (u.displayName||u.email) : '—';
-    updateAuthButtons(u);
-    if(u){ await carregarPreferencias(); }
+  toggleEmailBox.addEventListener('click', ()=>{ emailBox.style.display = (emailBox.style.display==='none'||emailBox.style.display==='')?'block':'none'; });
+
+  function mapAuthError(e){
+    const code=String(e?.code||e?.message||'').toLowerCase();
+    if(code.includes('invalid-email')) return 'E-mail inválido.';
+    if(code.includes('user-not-found')) return 'Usuário não encontrado.';
+    if(code.includes('wrong-password')) return 'Senha incorreta.';
+    if(code.includes('email-already-in-use')) return 'Este e-mail já está em uso.';
+    if(code.includes('weak-password')) return 'A senha deve ter ao menos 6 caracteres.';
+    if(code.includes('popup')) return 'Popup bloqueado. Tente novamente ou use “E-mail/Senha”.';
+    return 'Erro: '+(e?.message||e);
+  }
+
+  btnEmailLogin.addEventListener('click', async ()=>{
+    const email=(emailInput.value||'').trim(); const pass=passInput.value||'';
+    if(!email||!pass){alert('Preencha e-mail e senha.');return;}
+    try{ await signInWithEmailAndPassword(auth,email,pass); }
+    catch(e){ alert(mapAuthError(e)); }
+  });
+  btnEmailSignup.addEventListener('click', async ()=>{
+    const email=(emailInput.value||'').trim(); const pass=passInput.value||'';
+    const name=(emailName.value||'').trim();
+    if(!email||!pass){alert('Preencha e-mail e senha (mín. 6).');return;}
+    try{ const cred=await createUserWithEmailAndPassword(auth,email,pass); if(name) await updateProfile(cred.user,{displayName:name}); alert('Conta criada com sucesso.'); }
+    catch(e){ alert(mapAuthError(e)); }
+  });
+  btnEmailReset.addEventListener('click', async ()=>{
+    const email=(emailInput.value||'').trim(); if(!email){alert('Informe o e-mail.');return;}
+    try{ await sendPasswordResetEmail(auth,email); alert('Link de redefinição enviado.'); }
+    catch(e){ alert(mapAuthError(e)); }
   });
 
-  // Geometria/folgas
-  const FOLGA=2; const FOLGA_ALT=2;
-  function areaCirc(d){const r=d/2;return Math.PI*r*r;}
-  function areaRet(l,p){return l*p;}
-  function volCirc(d,h){return areaCirc(d)*h;}
-  function volRet(l,p,h){return areaRet(l,p)*h;}
+  function afterLoginUI(user){
+    if(!user) return;
+    emailInput.value=''; passInput.value=''; emailName.value=''; emailBox.style.display='none';
+  }
 
-  // Estado
+  onAuthStateChanged(auth, async (u)=>{
+    currentUser=u||null;
+    $('#who').textContent = u ? (u.displayName||u.email) : '—';
+    updateAuthButtons(u);
+    if(u){ afterLoginUI(u); await carregarPreferencias(); }
+  });
+
+  // --- Geometria ---
+  const areaCirc=d=>{const r=d/2;return Math.PI*r*r;}
+  const areaRet=(l,p)=>l*p;
+  const volCirc=(d,h)=>areaCirc(d)*h;
+  const volRet=(l,p,h)=>areaRet(l,p)*h;
+
+  // --- Estado ---
   const pecas=[]; const fixos=[];
-  function money(x){return Number(x).toFixed(2).replace('.',',');}
-  function fmt(x){return (!isFinite(x)||x===0)?'0':Number(x).toFixed(2);}
 
-  // Forno campos
-  const fornoFormato=$('#fornoFormato'); const fornoCampos=$('#fornoCampos');
+  // Forno
+  const fornoFormato=$('#fornoFormato'), fornoCampos=$('#fornoCampos');
   function renderForno(){
     if(fornoFormato.value==='circular'){
       fornoCampos.innerHTML=`
         <div style="grid-column:span 6"><label>Diâmetro interno (cm)
           <input type="number" id="fornoDiam" min="0" step="0.1" value="60"></label></div>
         <div style="grid-column:span 6"><label>Altura interna (cm)
-          <input type="number" id="fornoAlt" min="0" step="0.1" value="70"></label></div>`;
+          <input type="number" id="fornoAlt"  min="0" step="0.1" value="70"></label></div>`;
     }else{
       fornoCampos.innerHTML=`
-        <div style="grid-column:span 4"><label>Largura interna (cm)
+        <div style="grid-column:span 4"><label>Largura (cm)
           <input type="number" id="fornoLarg" min="0" step="0.1"></label></div>
-        <div style="grid-column:span 4"><label>Profundidade interna (cm)
+        <div style="grid-column:span 4"><label>Profundidade (cm)
           <input type="number" id="fornoProf" min="0" step="0.1"></label></div>
-        <div style="grid-column:span 4"><label>Altura interna (cm)
+        <div style="grid-column:span 4"><label>Altura (cm)
           <input type="number" id="fornoAlt" min="0" step="0.1"></label></div>`;
     }
   }
@@ -345,13 +410,10 @@
     }
   }
 
-  // Mobílias (editar/remover)
+  // Mobílias
   const fixoFormato=$('#fixoFormato'), labFixo1=$('#labFixo1'), labFixo2=$('#labFixo2');
-  function fixoLabels(){
-    if(fixoFormato.value==='circular'){ labFixo1.firstChild.textContent='Diâmetro (cm)'; labFixo2.firstChild.textContent='Profundidade (cm)'; }
-    else{ labFixo1.firstChild.textContent='Largura (cm)'; labFixo2.firstChild.textContent='Profundidade (cm)'; }
-  }
-  fixoFormato.addEventListener('change', fixoLabels); fixoLabels();
+  function fixoLabels(){ if(fixoFormato.value==='circular'){labFixo1.firstChild.textContent='Diâmetro (cm)';} else {labFixo1.firstChild.textContent='Largura (cm)';} }
+  fixoFormato.addEventListener('change',fixoLabels); fixoLabels();
 
   $('#btnAddFixo').addEventListener('click',()=>{
     const formato=fixoFormato.value;
@@ -369,17 +431,12 @@
   function renderFixos(){
     const tb=$('#tblFixos tbody'); tb.innerHTML='';
     fixos.forEach((f,i)=>{
-      const baseTxt = f.formato==='circular'? `Ø ${fmt(f.d1)} × (—)` : `${fmt(f.d1)} × ${fmt(f.d2)}`;
+      const baseTxt=f.formato==='circular'?`Ø ${fmt(f.d1)} × (—)`:`${fmt(f.d1)} × ${fmt(f.d2)}`;
       const tr=document.createElement('tr');
       tr.innerHTML=`
-        <td>${i+1}</td>
-        <td>${escapeHTML(f.desc)}</td>
-        <td>${f.formato}</td>
-        <td>${baseTxt}</td>
-        <td>${fmt(f.alt)}</td>
-        <td>${f.qtd}</td>
-        <td>${fmt(f.volUnit)}</td>
-        <td>${fmt(f.volUnit*f.qtd)}</td>
+        <td>${i+1}</td><td>${escapeHTML(f.desc)}</td><td>${f.formato}</td>
+        <td>${baseTxt}</td><td>${fmt(f.alt)}</td><td>${f.qtd}</td>
+        <td>${fmt(f.volUnit)}</td><td>${fmt(f.volUnit*f.qtd)}</td>
         <td>
           <button class="btn secondary" data-editar="${i}">Editar</button>
           <button class="btn danger" data-remover="${i}">Remover</button>
@@ -387,20 +444,17 @@
       tb.appendChild(tr);
     });
     tb.querySelectorAll('button[data-remover]').forEach(b=>b.addEventListener('click',e=>{
-      const idx=parseInt(e.currentTarget.getAttribute('data-remover'),10); fixos.splice(idx,1); renderFixos();
+      const i=parseInt(e.currentTarget.getAttribute('data-remover'),10); fixos.splice(i,1); renderFixos();
     }));
     tb.querySelectorAll('button[data-editar]').forEach(b=>b.addEventListener('click',e=>{
-      const idx=parseInt(e.currentTarget.getAttribute('data-editar'),10);
-      const f=fixos[idx]; if(!f) return;
-      const nd=prompt('Descrição:', f.desc); if(nd===null) return; f.desc=nd.trim()||f.desc;
-      const nd1=parseFloat(prompt('Dimensão 1 (diâmetro ou largura):', f.d1) || f.d1);
-      const nd2=parseFloat(prompt('Profundidade (para circular pode deixar igual à largura):', f.d2) || f.d2);
-      const nalt=parseFloat(prompt('Altura (cm):', f.alt) || f.alt);
-      const nq=parseInt(prompt('Quantidade:', f.qtd) || f.qtd,10);
-      if(isFinite(nd1)&&nd1>0) f.d1=nd1;
-      if(isFinite(nd2)&&nd2>0) f.d2=nd2;
-      if(isFinite(nalt)&&nalt>0) f.alt=nalt;
-      if(isFinite(nq)&&nq>0) f.qtd=nq;
+      const i=parseInt(e.currentTarget.getAttribute('data-editar'),10); const f=fixos[i]; if(!f) return;
+      const nd=prompt('Descrição:',f.desc); if(nd!==null) f.desc=nd.trim()||f.desc;
+      const nd1=parseFloat(prompt('Dimensão 1 (diâmetro/largura):',f.d1) || f.d1);
+      const nd2=parseFloat(prompt('Profundidade:',f.d2) || f.d2);
+      const nalt=parseFloat(prompt('Altura (cm):',f.alt) || f.alt);
+      const nq=parseInt(prompt('Quantidade:',f.qtd) || f.qtd,10);
+      if(isFinite(nd1)&&nd1>0) f.d1=nd1; if(isFinite(nd2)&&nd2>0) f.d2=nd2;
+      if(isFinite(nalt)&&nalt>0) f.alt=nalt; if(isFinite(nq)&&nq>0) f.qtd=nq;
       f.volUnit = f.formato==='circular' ? volCirc(f.d1,f.alt) : volRet(f.d1,f.d2,f.alt);
       renderFixos();
     }));
@@ -409,31 +463,22 @@
   // Peças
   const pecaFormato=$('#pecaFormato'), labDim1=$('#labDim1'), labDim2=$('#labDim2'), hintRound=$('#hintRound');
   function pecaLabels(){
-    if(pecaFormato.value==='circular'){
-      labDim1.firstChild.textContent='Diâmetro (cm)';
-      labDim2.firstChild.textContent='Profundidade (cm)';
-      hintRound.style.display='block';
-    }else{
-      labDim1.firstChild.textContent='Largura (cm)';
-      labDim2.firstChild.textContent='Profundidade (cm)';
-      hintRound.style.display='none';
-    }
+    if(pecaFormato.value==='circular'){ labDim1.firstChild.textContent='Diâmetro (cm)'; hintRound.style.display='block'; }
+    else{ labDim1.firstChild.textContent='Largura (cm)'; hintRound.style.display='none'; }
   }
-  pecaFormato.addEventListener('change', pecaLabels); pecaLabels();
-  $('#pecaDim2').addEventListener('focus', ()=>{ if(pecaFormato.value==='circular') hintRound.style.display='block'; });
+  pecaFormato.addEventListener('change',pecaLabels); pecaLabels();
+  $('#pecaDim2').addEventListener('focus',()=>{ if(pecaFormato.value==='circular') hintRound.style.display='block'; });
 
-  $('#btnAddPeca').addEventListener('click', ()=>{
+  $('#btnAddPeca').addEventListener('click',()=>{
     const formato=pecaFormato.value;
     const desc=($('#pecaDesc').value||'').trim();
     const d1=parseFloat($('#pecaDim1').value||0);
     const d2=parseFloat($('#pecaDim2').value||0);
     const alt=parseFloat($('#pecaAlt').value||0);
     const qtd=parseInt($('#pecaQtd').value||0,10);
-    if(!desc||d1<=0||alt<=0||qtd<=0||d2<=0){alert('Preencha descrição, dimensões, altura e quantidade.');return;}
+    if(!desc||d1<=0||d2<=0||alt<=0||qtd<=0){alert('Preencha descrição, dimensões, altura e quantidade.');return;}
     // folgas
-    const L = d1 + 2*FOLGA;
-    const P = d2 + 2*FOLGA;
-    const H = alt + FOLGA_ALT;
+    const L=d1+2*FOLGA, P=d2+2*FOLGA, H=alt+FOLGA_ALT;
     const volUn = formato==='circular' ? volCirc(L,H) : volRet(L,P,H);
     pecas.push({desc,formato,d1,d2,alt,qtd,volUnit:volUn});
     renderPecas();
@@ -442,17 +487,12 @@
   function renderPecas(){
     const tb=$('#tblPecas tbody'); tb.innerHTML='';
     pecas.forEach((p,i)=>{
-      const baseTxt = p.formato==='circular'? `Ø ${fmt(p.d1)} × (—)` : `${fmt(p.d1)} × ${fmt(p.d2)}`;
+      const baseTxt=p.formato==='circular'?`Ø ${fmt(p.d1)} × (—)`:`${fmt(p.d1)} × ${fmt(p.d2)}`;
       const tr=document.createElement('tr');
       tr.innerHTML=`
-        <td>${i+1}</td>
-        <td>${escapeHTML(p.desc)}</td>
-        <td>${p.formato}</td>
-        <td>${baseTxt}</td>
-        <td>${fmt(p.alt)}</td>
-        <td>${p.qtd}</td>
-        <td>${fmt(p.volUnit)}</td>
-        <td>${fmt(p.volUnit*p.qtd)}</td>
+        <td>${i+1}</td><td>${escapeHTML(p.desc)}</td><td>${p.formato}</td>
+        <td>${baseTxt}</td><td>${fmt(p.alt)}</td><td>${p.qtd}</td>
+        <td>${fmt(p.volUnit)}</td><td>${fmt(p.volUnit*p.qtd)}</td>
         <td>
           <button class="btn secondary" data-editar="${i}">Editar</button>
           <button class="btn danger" data-remover="${i}">Remover</button>
@@ -460,105 +500,98 @@
       tb.appendChild(tr);
     });
     tb.querySelectorAll('button[data-remover]').forEach(b=>b.addEventListener('click',e=>{
-      const idx=parseInt(e.currentTarget.getAttribute('data-remover'),10); pecas.splice(idx,1); renderPecas();
+      const i=parseInt(e.currentTarget.getAttribute('data-remover'),10); pecas.splice(i,1); renderPecas();
     }));
     tb.querySelectorAll('button[data-editar]').forEach(b=>b.addEventListener('click',e=>{
-      const idx=parseInt(e.currentTarget.getAttribute('data-editar'),10);
-      const p=pecas[idx]; if(!p) return;
-      const nd=prompt('Descrição:', p.desc); if(nd===null) return; p.desc=nd.trim()||p.desc;
-      const nd1=parseFloat(prompt('Largura/Diâmetro:', p.d1) || p.d1);
-      const nd2=parseFloat(prompt('Profundidade (se redonda, repita):', p.d2) || p.d2);
-      const nalt=parseFloat(prompt('Altura (cm):', p.alt) || p.alt);
-      const nq=parseInt(prompt('Quantidade:', p.qtd) || p.qtd,10);
-      if(isFinite(nd1)&&nd1>0) p.d1=nd1;
-      if(isFinite(nd2)&&nd2>0) p.d2=nd2;
-      if(isFinite(nalt)&&nalt>0) p.alt=nalt;
-      if(isFinite(nq)&&nq>0) p.qtd=nq;
-      const L = p.d1 + 2*FOLGA, P = p.d2 + 2*FOLGA, H = p.alt + FOLGA_ALT;
+      const i=parseInt(e.currentTarget.getAttribute('data-editar'),10); const p=pecas[i]; if(!p) return;
+      const nd=prompt('Descrição:',p.desc); if(nd!==null) p.desc=nd.trim()||p.desc;
+      const nd1=parseFloat(prompt('Largura/Diâmetro:',p.d1) || p.d1);
+      const nd2=parseFloat(prompt('Profundidade (se redonda, repita largura):',p.d2) || p.d2);
+      const nalt=parseFloat(prompt('Altura (cm):',p.alt) || p.alt);
+      const nq=parseInt(prompt('Quantidade:',p.qtd) || p.qtd,10);
+      if(isFinite(nd1)&&nd1>0) p.d1=nd1; if(isFinite(nd2)&&nd2>0) p.d2=nd2;
+      if(isFinite(nalt)&&nalt>0) p.alt=nalt; if(isFinite(nq)&&nq>0) p.qtd=nq;
+      const L=p.d1+2*FOLGA, P=p.d2+2*FOLGA, H=p.alt+FOLGA_ALT;
       p.volUnit = p.formato==='circular' ? volCirc(L,H) : volRet(L,P,H);
       renderPecas();
     }));
   }
 
-  // Calcular + atualização de UI
-  $('#btnCalcular').addEventListener('click', ()=>{
+  // Cálculo & UI
+  $('#btnCalcular').addEventListener('click',()=>{
     calcular();
     if(!ultimoResultado) return;
-    const confirmar = confirm(`O forno está ${ultimoResultado.pct.toFixed(1)}% cheio.\nDeseja ENCERRAR esta carga agora?`);
+    const confirmar = confirm(`O forno está ${ultimoResultado.pct.toFixed(1)}% cheio.\nEncerrar esta carga agora?`);
     cargaEncerrada = confirmar;
     $('#btnSaveJob').disabled = !confirmar;
     $('#btnGerarPDF').disabled = !confirmar;
-    if(!confirmar){
-      alert('Você pode continuar adicionando peças para aproveitar o espaço restante.');
-    }
+    if(!confirmar) alert('Você pode continuar adicionando peças para aproveitar o espaço restante.');
   });
 
-  $('#btnLimparTudo').addEventListener('click', ()=>{
+  $('#btnLimparTudo').addEventListener('click',()=>{
     pecas.length=0; fixos.length=0; renderPecas(); renderFixos();
     $('#precoFornoCheio').value=''; $('#tipoQueima').value='Biscoito';
     ['volForno','volFixos','volUtil','volPecas','pctOcup','outCheio','outQueima','outPagar'].forEach(id=>$('#'+id).textContent='—');
-    $('#barOcup').style.width='0%';
-    cargaEncerrada=false; ultimoResultado=null;
+    $('#barOcup').style.width='0%'; cargaEncerrada=false; ultimoResultado=null;
   });
 
   function calcular(){
-    const vf = volForno();
-    const vFix = fixos.reduce((s,f)=>s+f.volUnit*f.qtd,0);
-    const vUtil = Math.max(0, vf - vFix);
-    const vPcs = pecas.reduce((s,p)=>s+p.volUnit*p.qtd,0);
+    const vf=volForno();
+    const vFix=fixos.reduce((s,f)=>s+f.volUnit*f.qtd,0);
+    const vUtil=Math.max(0,vf-vFix);
+    const vPcs=pecas.reduce((s,p)=>s+p.volUnit*p.qtd,0);
 
     $('#volForno').textContent=fmt(vf);
     $('#volFixos').textContent=fmt(vFix);
     $('#volUtil').textContent=fmt(vUtil);
     $('#volPecas').textContent=fmt(vPcs);
 
-    const pct = vUtil>0 ? (vPcs/vUtil)*100 : 0;
-    $('#pctOcup').textContent = pct? pct.toFixed(2)+'%':'—';
-    $('#barOcup').style.width = Math.min(100, Math.max(0,pct))+'%';
+    const pct=vUtil>0?(vPcs/vUtil)*100:0;
+    $('#pctOcup').textContent=pct?pct.toFixed(2)+'%':'—';
+    $('#barOcup').style.width=Math.min(100,Math.max(0,pct))+'%';
 
     const precoCheio=parseFloat($('#precoFornoCheio').value||0);
-    $('#outCheio').textContent = precoCheio>0? ('R$ '+money(precoCheio)):'—';
-    $('#outQueima').textContent = $('#tipoQueima').value;
-    const pagar = (pct>0 && precoCheio>0) ? (precoCheio * (pct/100)) : 0;
-    $('#outPagar').textContent = (pagar>0)? ('R$ '+money(pagar)):'—';
+    $('#outCheio').textContent=precoCheio>0?('R$ '+money(precoCheio)):'—';
+    $('#outQueima').textContent=$('#tipoQueima').value;
+    const pagar=(pct>0&&precoCheio>0)?(precoCheio*(pct/100)):0;
+    $('#outPagar').textContent=(pagar>0)?('R$ '+money(pagar)):'—';
 
-    ultimoResultado={vUtil, vPcs, pct, precoCheio, pagar, tipo:$('#tipoQueima').value, timestamp:new Date(), pecas:JSON.parse(JSON.stringify(pecas))};
+    ultimoResultado={vUtil,vPcs,pct,precoCheio,pagar,tipo:$('#tipoQueima').value,timestamp:new Date(),pecas:JSON.parse(JSON.stringify(pecas))};
   }
 
-  // PDF cliente (gera e salva no histórico automaticamente)
+  // PDF do cliente (gera e salva)
   $('#btnGerarPDF').addEventListener('click', async ()=>{
     if(!ultimoResultado) calcular();
-    if(!ultimoResultado || !cargaEncerrada){ alert('Clique em Calcular e confirme ENCERRAR para gerar o PDF.'); return; }
-    await salvarQueima(true); // true => chamado pelo PDF
+    if(!ultimoResultado || !cargaEncerrada){ alert('Calcule e encerre a carga para gerar PDF.'); return; }
+    await salvarQueima(true);
     gerarPDFCliente(ultimoResultado);
   });
 
   function gerarPDFCliente(r){
     const { jsPDF }=window.jspdf;
     const doc=new jsPDF({unit:'pt',format:'a4'});
-    const pageW = doc.internal.pageSize.getWidth();
+    const pageW=doc.internal.pageSize.getWidth();
 
-    // Tabela – rateio proporcional por volume
-    const totalVol=r.vPcs; const totalR$=r.pagar;
-    const linhas = pecas.map((p,i)=>{
+    const totalVol=r.vPcs, totalR$=r.pagar;
+    const linhas=pecas.map((p,i)=>{
       const volTot=p.volUnit*p.qtd;
-      const fraq = totalVol>0 ? volTot/totalVol : 0;
-      const valorTotal= fraq*totalR$;
-      const valorUnit = p.qtd>0 ? valorTotal/p.qtd : 0;
-      return [ String(i+1), p.desc, String(p.qtd), 'R$ '+money(valorUnit), 'R$ '+money(valorTotal) ];
+      const fraq= totalVol>0? volTot/totalVol : 0;
+      const valorTotal=fraq*totalR$;
+      const valorUnit=p.qtd?valorTotal/p.qtd:0;
+      return [String(i+1),p.desc,String(p.qtd),'R$ '+money(valorUnit),'R$ '+money(valorTotal)];
     });
 
-    doc.setFont('helvetica','bold'); doc.setFontSize(16);
-    doc.text('Relatório de Queima – Valores por Peça', pageW/2, 40, {align:'center'});
-    doc.setFont('helvetica','normal'); doc.setFontSize(10);
-    doc.text(`Tipo de queima: ${r.tipo}`, 40, 64);
-    doc.text(`Forno cheio: R$ ${money(r.precoCheio||0)}  •  Valor total: R$ ${money(r.pagar||0)}  •  Ocupação: ${r.pct.toFixed(1)}%`, 40, 80);
+    doc.setFont('helvetica','bold');doc.setFontSize(16);
+    doc.text('Relatório de Queima – Valores por Peça',pageW/2,40,{align:'center'});
+    doc.setFont('helvetica','normal');doc.setFontSize(10);
+    doc.text(`Tipo: ${r.tipo}`,40,64);
+    doc.text(`Forno cheio: R$ ${money(r.precoCheio||0)}  •  Total: R$ ${money(r.pagar||0)}  •  Ocupação: ${r.pct.toFixed(1)}%`,40,80);
 
     doc.autoTable({
-      startY: 100,
+      startY:100,
       head:[['#','Descrição','Qtd','R$ por peça','R$ do item']],
-      body: linhas.length?linhas:[['–','(sem peças)','–','–','–']],
-      theme:'grid', styles:{fontSize:10, cellPadding:4}, headStyles:{fillColor:[37,99,235]}
+      body:linhas.length?linhas:[['–','(sem peças)','–','–','–']],
+      theme:'grid',styles:{fontSize:10,cellPadding:4},headStyles:{fillColor:[37,99,235]}
     });
 
     doc.save(`queima-${dataNome(r.timestamp)}.pdf`);
@@ -570,12 +603,12 @@
 
   async function salvarPreferencias(){
     if(!currentUser) return alert('Faça login primeiro.');
-    const formato=fornoFormato.value;
+    const formato=$('#fornoFormato').value;
     const kiln = (formato==='circular')
       ? {formato, diam:num($('#fornoDiam').value), alt:num($('#fornoAlt').value)}
       : {formato, larg:num($('#fornoLarg').value), prof:num($('#fornoProf').value), alt:num($('#fornoAlt').value)};
-    const defaultFixos = fixos.map(f=>({desc:f.desc, formato:f.formato, d1:f.d1, d2:f.d2, alt:f.alt, qtd:f.qtd}));
-    await setDoc(doc(db,'users',currentUser.uid), { defaultKiln:kiln, defaultFixos }, { merge:true });
+    const defaultFixos=fixos.map(f=>({desc:f.desc,formato:f.formato,d1:f.d1,d2:f.d2,alt:f.alt,qtd:f.qtd}));
+    await setDoc(doc(db,'users',currentUser.uid),{defaultKiln:kiln,defaultFixos},{merge:true});
     alert('Dados salvos (forno + mobílias).');
   }
 
@@ -584,100 +617,73 @@
     const snap=await getDoc(doc(db,'users',currentUser.uid)); if(!snap.exists()) return;
     const d=snap.data();
     if(d.defaultKiln){
-      $('#fornoFormato').value=d.defaultKiln.formato||'circular';
-      renderForno();
-      if(d.defaultKiln.formato==='circular'){
-        $('#fornoDiam').value=d.defaultKiln.diam??'';
-        $('#fornoAlt').value=d.defaultKiln.alt??'';
-      }else{
-        $('#fornoLarg').value=d.defaultKiln.larg??'';
-        $('#fornoProf').value=d.defaultKiln.prof??'';
-        $('#fornoAlt').value=d.defaultKiln.alt??'';
-      }
+      $('#fornoFormato').value=d.defaultKiln.formato||'circular'; renderForno();
+      if(d.defaultKiln.formato==='circular'){ $('#fornoDiam').value=d.defaultKiln.diam??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
+      else { $('#fornoLarg').value=d.defaultKiln.larg??''; $('#fornoProf').value=d.defaultKiln.prof??''; $('#fornoAlt').value=d.defaultKiln.alt??''; }
     }
     if(Array.isArray(d.defaultFixos)){
       fixos.length=0;
       d.defaultFixos.forEach(f=>{
-        const volUn = f.formato==='circular' ? volCirc(f.d1,f.alt) : volRet(f.d1,f.d2,f.alt);
-        fixos.push({desc:f.desc, formato:f.formato, d1:f.d1, d2:f.d2||0, alt:f.alt, qtd:f.qtd, volUnit:volUn});
+        const volUn=f.formato==='circular'?volCirc(f.d1,f.alt):volRet(f.d1,f.d2,f.alt);
+        fixos.push({desc:f.desc,formato:f.formato,d1:f.d1,d2:f.d2||0,alt:f.alt,qtd:f.qtd,volUnit:volUn});
       });
       renderFixos();
     }
   }
 
-  // Salvar QUEIMA (histórico)
-  $('#btnSaveJob').addEventListener('click', ()=>salvarQueima(false));
-
+  // Salvar QUEIMA
+  $('#btnSaveJob').addEventListener('click',()=>salvarQueima(false));
   async function salvarQueima(chamadoPorPDF){
     if(!currentUser) return alert('Faça login primeiro.');
-    if(!ultimoResultado || !cargaEncerrada){ return alert('Calcule e encerre a carga primeiro.'); }
+    if(!ultimoResultado||!cargaEncerrada){alert('Calcule e encerre a carga.');return;}
     const job={
-      createdAt: serverTimestamp(),
-      tipoQueima: $('#tipoQueima').value,
-      precoFornoCheio: num($('#precoFornoCheio').value),
-      resumo:{ valorTotal: Number(ultimoResultado.pagar||0), pct: Number(ultimoResultado.pct||0),
-               pecasCount: pecas.reduce((s,p)=>s+(p.qtd||0),0) },
-      fornoSnapshot: snapshotForno(),
-      fixos: fixos.map(sanitItem),
-      pecas: pecas.map(sanitItem)
+      createdAt:serverTimestamp(),
+      tipoQueima:$('#tipoQueima').value,
+      precoFornoCheio:num($('#precoFornoCheio').value),
+      resumo:{valorTotal:Number(ultimoResultado.pagar||0),pct:Number(ultimoResultado.pct||0),
+              pecasCount:pecas.reduce((s,p)=>s+(p.qtd||0),0)},
+      fornoSnapshot:snapshotForno(),
+      fixos:fixos.map(sanitItem),
+      pecas:pecas.map(sanitItem)
     };
-    const ref = await addDoc(collection(db,'users',currentUser.uid,'queimas'), job);
+    const ref=await addDoc(collection(db,'users',currentUser.uid,'queimas'),job);
     if(!chamadoPorPDF) alert('Queima salva. ID: '+ref.id);
   }
 
-  // Histórico – PDF
-  $('#btnHist').addEventListener('click', gerarHistPDF);
-  async function gerarHistPDF(){
+  // Histórico PDF
+  $('#btnHist').addEventListener('click', async ()=>{
     if(!currentUser) return alert('Faça login primeiro.');
-    const term = ($('#histQuery').value||'').trim().toLowerCase();
-
-    const col = collection(db,'users',currentUser.uid,'queimas');
-    const snap = await getDocs(col);
-
+    const term=($('#histQuery').value||'').trim().toLowerCase();
+    const snap=await getDocs(collection(db,'users',currentUser.uid,'queimas'));
     const rows=[]; let i=1;
-    snap.forEach(docu=>{
-      const q=docu.data();
-      const dt = q.createdAt?.toDate ? q.createdAt.toDate() : null;
-      const dataTxt = dt ? dataBR(dt) : '—';
-      const valor = q.resumo?.valorTotal ?? 0;
-      const tipo  = q.tipoQueima || '—';
-      const qtdPecas = q.resumo?.pecasCount ?? (Array.isArray(q.pecas)? q.pecas.reduce((s,p)=>s+(p.qtd||0),0) : 0);
-      const linha = [String(i++), dataTxt, tipo, String(qtdPecas), 'R$ '+money(valor)];
-      const textSearch = (dataTxt+' '+tipo+' '+qtdPecas+' '+valor).toLowerCase();
-      if(!term || textSearch.includes(term)) rows.push(linha);
+    snap.forEach(d=>{
+      const q=d.data(); const dt=q.createdAt?.toDate? q.createdAt.toDate():null;
+      const dataTxt=dt?dataBR(dt):'—'; const valor=q.resumo?.valorTotal??0;
+      const tipo=q.tipoQueima||'—'; const qtd=q.resumo?.pecasCount ?? (Array.isArray(q.pecas)?q.pecas.reduce((s,p)=>s+(p.qtd||0),0):0);
+      const row=[String(i++),dataTxt,tipo,String(qtd),'R$ '+money(valor)];
+      const text=(dataTxt+' '+tipo+' '+qtd+' '+valor).toLowerCase();
+      if(!term||text.includes(term)) rows.push(row);
     });
-
-    const { jsPDF }=window.jspdf;
-    const doc=new jsPDF({unit:'pt',format:'a4'});
-    const pageW = doc.internal.pageSize.getWidth();
-    doc.setFont('helvetica','bold'); doc.setFontSize(16);
-    doc.text('Histórico de Queimas', pageW/2, 40, {align:'center'});
-    doc.autoTable({
-      startY: 70,
-      head:[['#','Data','Tipo','Qtd Peças','Valor (R$)']],
-      body: rows.length?rows:[['–','—','—','—','—']],
-      theme:'grid', styles:{fontSize:10, cellPadding:4}, headStyles:{fillColor:[37,99,235]}
-    });
+    const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:'pt',format:'a4'}); const w=doc.internal.pageSize.getWidth();
+    doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text('Histórico de Queimas',w/2,40,{align:'center'});
+    doc.autoTable({startY:70,head:[['#','Data','Tipo','Qtd Peças','Valor (R$)']],body:rows.length?rows:[['–','—','—','—','—']],theme:'grid',styles:{fontSize:10,cellPadding:4},headStyles:{fillColor:[37,99,235]}});
     doc.save('historico-queimas.pdf');
-  }
+  });
 
-  // Helpers
-  function sanitItem(x){ return { desc:x.desc, formato:x.formato, d1:x.d1, d2:x.d2, alt:x.alt, qtd:x.qtd }; }
+  // Aux
+  function sanitItem(x){return{desc:x.desc,formato:x.formato,d1:x.d1,d2:x.d2,alt:x.alt,qtd:x.qtd};}
   function snapshotForno(){
-    if(fornoFormato.value==='circular') return {formato:'circular', diam:num($('#fornoDiam').value), alt:num($('#fornoAlt').value)};
-    return {formato:'retangular', larg:num($('#fornoLarg').value), prof:num($('#fornoProf').value), alt:num($('#fornoAlt').value)};
+    if($('#fornoFormato').value==='circular') return {formato:'circular',diam:num($('#fornoDiam').value),alt:num($('#fornoAlt').value)};
+    return {formato:'retangular',larg:num($('#fornoLarg').value),prof:num($('#fornoProf').value),alt:num($('#fornoAlt').value)};
   }
-  function num(v){ const n=parseFloat(v||0); return isFinite(n)?n:0; }
-  function escapeHTML(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function dataBR(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${z(dt.getDate())}/${z(dt.getMonth()+1)}/${dt.getFullYear()} ${z(dt.getHours())}:${z(dt.getMinutes())}`; }
-  function dataNome(d){ const z=n=>String(n).padStart(2,'0'); const dt=d instanceof Date?d:new Date(d); return `${dt.getFullYear()}-${z(dt.getMonth()+1)}-${z(dt.getDate())}-${z(dt.getHours())}${z(dt.getMinutes())}`; }
+  function num(v){const n=parseFloat(v||0);return isFinite(n)?n:0;}
 </script>
 
-<!-- PWA: service worker -->
+<!-- PWA: registrar SW -->
 <script>
   if('serviceWorker' in navigator){
     window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(console.error));
   }
 </script>
 </body>
-  </html>
+</html>
